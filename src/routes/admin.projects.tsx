@@ -8,14 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { projects, inr } from "@/lib/mock-data";
+import { inr } from "@/lib/mock-data";
+import { getProjects } from "@/server/projects";
 
 export const Route = createFileRoute("/admin/projects")({
   head: () => ({ meta: [{ title: "Projects · Naushik Admin" }] }),
+  loader: () => getProjects(),
   component: AdminProjects,
 });
 
 function AdminProjects() {
+  const projects = Route.useLoaderData();
   return (
     <AppShell title="Projects">
       <PageHeader

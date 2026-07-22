@@ -13,14 +13,17 @@ import { StatusBadge } from "@/components/app/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { projects, kpiTrend, expenseBreakdown, workforceTrend, materialRequests, auditLogs, inr } from "@/lib/mock-data";
+import { kpiTrend, expenseBreakdown, workforceTrend, materialRequests, auditLogs, inr } from "@/lib/mock-data";
+import { getProjects } from "@/server/projects";
 
 export const Route = createFileRoute("/admin/dashboard")({
   head: () => ({ meta: [{ title: "Admin Dashboard · Naushik" }] }),
+  loader: () => getProjects(),
   component: AdminDashboard,
 });
 
 function AdminDashboard() {
+  const projects = Route.useLoaderData();
   const active = projects.filter(p => p.status === "active").length;
   const delayed = projects.filter(p => p.status === "delayed").length;
   const pending = materialRequests.filter(m => m.status === "pending").length;

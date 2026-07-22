@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { login } from "@/server/auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -23,11 +24,20 @@ function LoginPage() {
   const navigate = useNavigate();
   const [role, setRole] = useState<"admin" | "site">("admin");
   const [showPw, setShowPw] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try { localStorage.setItem("naushik.role", role); } catch {}
-    navigate({ to: role === "admin" ? "/admin/dashboard" : "/site/dashboard" });
+    setError("");
+    try { 
+      await login({ data: { email, password } });
+      try { localStorage.setItem("naushik.role", role); } catch {}
+      navigate({ to: role === "admin" ? "/admin/dashboard" : "/site/dashboard" });
+    } catch (err: any) {
+      setError(err.message || "Failed to login");
+    }
   };
 
   return (
@@ -123,13 +133,16 @@ function LoginPage() {
           </div>
 
           <form onSubmit={submit} className="mt-6 space-y-4">
+            {error && <div className="text-sm font-medium text-destructive">{error}</div>}
             <div className="space-y-1.5">
               <Label htmlFor="email">Work email</Label>
               <Input
                 id="email"
                 type="email"
                 autoComplete="email"
-                defaultValue={role === "admin" ? "admin@naushik.co" : "rajesh@naushik.co"}
+                placeholder={role === "admin" ? "admin@naushik.co" : "rajesh@naushik.co"}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 key={role}
                 required
               />
@@ -140,7 +153,15 @@ function LoginPage() {
                 <button type="button" className="text-xs font-medium text-primary hover:underline">Forgot?</button>
               </div>
               <div className="relative">
-                <Input id="password" type={showPw ? "text" : "password"} defaultValue="••••••••••" required className="pr-10" />
+                <Input 
+                  id="password" 
+                  type={showPw ? "text" : "password"} 
+                  placeholder="••••••••••" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required 
+                  className="pr-10" 
+                />
                 <button
                   type="button"
                   onClick={() => setShowPw((s) => !s)}

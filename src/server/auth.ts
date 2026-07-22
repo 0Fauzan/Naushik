@@ -90,3 +90,9 @@ export const logout = createServerFn("POST", async () => {
   deleteCookie("auth_token");
   return { success: true };
 });
+
+export const getMe = createServerFn("GET", async (_, ctx) => {
+  // Since we use authMiddleware on endpoints, getMe could just use it, but to keep it simple:
+  // Let's just create a new auth middleware for it or use it directly.
+  return { success: true }; // We'll add authMiddleware to this
+}).middleware([authMiddleware]);
