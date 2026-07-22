@@ -1,0 +1,205 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Naushik Construction — design system.
+ * Brand: Steel Blue #1B5C8A + Brand Gold #8B6914.
+ * All color values use oklch.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+}
+
+/*
+ * Steel Blue family (5 steps): deep navy → frost
+ *   #0E2F47  #14476B  #1B5C8A  #4C8AB3  #E8ECF0
+ * Brand Gold family (5 steps): dark bronze → cream
+ *   #4D3A0B  #6C4F10  #8B6914  #C49A3D  #F5EBD0
+ * Neutrals: charcoal #1A1A1A, fog #E8ECF0
+ */
+
+:root {
+  --radius: 0.625rem;
+
+  --background: oklch(0.995 0.002 240);
+  --foreground: oklch(0.18 0.01 240);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.01 240);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.01 240);
+
+  /* Steel Blue #1B5C8A as primary */
+  --primary: oklch(0.48 0.08 240);
+  --primary-foreground: oklch(0.985 0.005 240);
+
+  --secondary: oklch(0.96 0.008 240);
+  --secondary-foreground: oklch(0.28 0.04 240);
+
+  --muted: oklch(0.955 0.006 240);
+  --muted-foreground: oklch(0.5 0.02 240);
+
+  --accent: oklch(0.93 0.025 240);
+  --accent-foreground: oklch(0.28 0.04 240);
+
+  --destructive: oklch(0.55 0.21 27);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  --border: oklch(0.9 0.01 240);
+  --input: oklch(0.9 0.01 240);
+  --ring: oklch(0.48 0.08 240);
+
+  /* Brand tokens */
+  --brand: oklch(0.48 0.08 240);
+  --brand-foreground: oklch(0.985 0.005 240);
+  --gold: oklch(0.55 0.09 75);
+  --gold-foreground: oklch(0.99 0.01 75);
+
+  --success: oklch(0.6 0.14 155);
+  --success-foreground: oklch(0.99 0 0);
+  --warning: oklch(0.72 0.15 70);
+  --warning-foreground: oklch(0.2 0.04 70);
+  --info: oklch(0.65 0.12 230);
+  --info-foreground: oklch(0.99 0 0);
+
+  --chart-1: oklch(0.48 0.08 240);   /* steel blue */
+  --chart-2: oklch(0.55 0.09 75);    /* brand gold */
+  --chart-3: oklch(0.65 0.07 240);   /* mid blue */
+  --chart-4: oklch(0.72 0.15 70);    /* warm amber */
+  --chart-5: oklch(0.55 0.04 240);   /* slate */
+
+  --sidebar: oklch(0.28 0.04 240);
+  --sidebar-foreground: oklch(0.95 0.005 240);
+  --sidebar-primary: oklch(0.55 0.09 75);
+  --sidebar-primary-foreground: oklch(0.99 0.01 75);
+  --sidebar-accent: oklch(0.36 0.05 240);
+  --sidebar-accent-foreground: oklch(0.98 0.005 240);
+  --sidebar-border: oklch(0.36 0.04 240);
+  --sidebar-ring: oklch(0.55 0.09 75);
+}
+
+.dark {
+  --background: oklch(0.15 0.015 240);
+  --foreground: oklch(0.97 0.005 240);
+
+  --card: oklch(0.22 0.02 240);
+  --card-foreground: oklch(0.97 0.005 240);
+  --popover: oklch(0.22 0.02 240);
+  --popover-foreground: oklch(0.97 0.005 240);
+
+  --primary: oklch(0.65 0.1 240);
+  --primary-foreground: oklch(0.14 0.02 240);
+
+  --secondary: oklch(0.26 0.025 240);
+  --secondary-foreground: oklch(0.97 0.005 240);
+
+  --muted: oklch(0.28 0.02 240);
+  --muted-foreground: oklch(0.78 0.02 240);
+
+  --accent: oklch(0.32 0.035 240);
+  --accent-foreground: oklch(0.97 0.005 240);
+
+  --destructive: oklch(0.65 0.2 27);
+  --destructive-foreground: oklch(0.99 0 0);
+
+  --border: oklch(1 0 0 / 20%);
+  --input: oklch(1 0 0 / 26%);
+  --ring: oklch(0.65 0.1 240);
+
+  --brand: oklch(0.65 0.1 240);
+  --brand-foreground: oklch(0.14 0.02 240);
+  --gold: oklch(0.72 0.12 75);
+  --gold-foreground: oklch(0.16 0.03 75);
+
+  --success: oklch(0.68 0.15 155);
+  --success-foreground: oklch(0.14 0.02 155);
+  --warning: oklch(0.78 0.15 70);
+  --warning-foreground: oklch(0.18 0.04 70);
+  --info: oklch(0.72 0.13 230);
+  --info-foreground: oklch(0.14 0.02 230);
+
+  --chart-1: oklch(0.65 0.1 240);
+  --chart-2: oklch(0.72 0.12 75);
+  --chart-3: oklch(0.78 0.08 240);
+  --chart-4: oklch(0.78 0.15 70);
+  --chart-5: oklch(0.6 0.04 240);
+
+  --sidebar: oklch(0.19 0.02 240);
+  --sidebar-foreground: oklch(0.97 0.005 240);
+  --sidebar-primary: oklch(0.72 0.12 75);
+  --sidebar-primary-foreground: oklch(0.16 0.03 75);
+  --sidebar-accent: oklch(0.32 0.035 240);
+  --sidebar-accent-foreground: oklch(0.97 0.005 240);
+  --sidebar-border: oklch(1 0 0 / 16%);
+  --sidebar-ring: oklch(0.72 0.12 75);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "cv11", "ss01", "ss03";
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    letter-spacing: -0.02em;
+  }
+}
