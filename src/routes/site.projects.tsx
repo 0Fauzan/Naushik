@@ -6,15 +6,19 @@ import { StatusBadge } from "@/components/app/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { projects, inr } from "@/lib/mock-data";
+import { inr } from "@/lib/mock-data";
+import { getProjects } from "@/server/projects";
 
 export const Route = createFileRoute("/site/projects")({
   head: () => ({ meta: [{ title: "My Projects · Naushik Site" }] }),
+  loader: () => getProjects(),
   component: SiteProjects,
 });
 
 function SiteProjects() {
-  const mine = [projects[0]];
+  const dbProjects = Route.useLoaderData();
+  const projects = Array.isArray(dbProjects) ? dbProjects : [];
+  const mine = projects.length > 0 ? [projects[0]] : [];
   return (
     <AppShell title="My Projects">
       <PageHeader title="Assigned projects" description="Project overview, timeline, documents and history." />
@@ -85,6 +89,16 @@ function SiteProjects() {
           </Tabs>
         </Card>
       ))}
+
+      {mine.length === 0 && (
+        <div className="mt-8 flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
+          <MapPin className="mb-4 h-10 w-10 text-muted-foreground/50" />
+          <h3 className="text-lg font-semibold tracking-tight">No projects assigned</h3>
+          <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+            You currently do not have any projects assigned to you. Once an admin assigns a project, it will appear here.
+          </p>
+        </div>
+      )}
     </AppShell>
   );
 }

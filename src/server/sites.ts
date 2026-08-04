@@ -1,25 +1,39 @@
 import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
-import { db } from "../db";
-import { sites } from "../db/schema";
 import { authMiddleware } from "./middleware";
 
-export const getSites = createServerFn("GET", async (_, ctx) => {
+export const getSites = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .handler(async () => {
+  const { db } = await import("../db");
+  const { sites } = await import("../db/schema");
   return await db.select().from(sites);
-}).middleware([authMiddleware]);
+});
 
-export const createSite = createServerFn("POST", async (data: { name: string; location?: string }, ctx) => {
+export const createSite = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .handler(async ({ data }: { data: { name: string; location?: string } }) => {
+  const { db } = await import("../db");
+  const { sites } = await import("../db/schema");
   const [newSite] = await db.insert(sites).values(data).returning();
   return newSite;
-}).middleware([authMiddleware]);
+});
 
-export const updateSite = createServerFn("POST", async (data: { id: number; name?: string; location?: string; status?: string }, ctx) => {
+export const updateSite = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .handler(async ({ data }: { data: { id: number; name?: string; location?: string; status?: string } }) => {
+  const { db } = await import("../db");
+  const { sites } = await import("../db/schema");
   const { id, ...updateData } = data;
   const [updatedSite] = await db.update(sites).set(updateData).where(eq(sites.id, id)).returning();
   return updatedSite;
-}).middleware([authMiddleware]);
+});
 
-export const deleteSite = createServerFn("POST", async (id: number, ctx) => {
+export const deleteSite = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .handler(async ({ data: id }: { data: number }) => {
+  const { db } = await import("../db");
+  const { sites } = await import("../db/schema");
   await db.delete(sites).where(eq(sites.id, id));
   return { success: true };
-}).middleware([authMiddleware]);
+});

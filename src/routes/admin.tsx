@@ -5,7 +5,9 @@ import { getMe } from "@/server/auth";
 export const Route = createFileRoute("/admin")({
   beforeLoad: async () => {
     try {
-      await getMe();
+      const res = await getMe();
+      if (!res.success) throw new Error();
+      return { dbUser: res.user };
     } catch (err) {
       throw redirect({ to: "/" });
     }
@@ -14,8 +16,9 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
+  const { dbUser } = Route.useRouteContext();
   return (
-    <RoleProvider initial="admin">
+    <RoleProvider initial="admin" initialUser={dbUser}>
       <Outlet />
     </RoleProvider>
   );

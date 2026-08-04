@@ -5,7 +5,9 @@ import { getMe } from "@/server/auth";
 export const Route = createFileRoute("/site")({
   beforeLoad: async () => {
     try {
-      await getMe();
+      const res = await getMe();
+      if (!res.success) throw new Error();
+      return { dbUser: res.user };
     } catch (err) {
       throw redirect({ to: "/" });
     }
@@ -14,8 +16,9 @@ export const Route = createFileRoute("/site")({
 });
 
 function SiteLayout() {
+  const { dbUser } = Route.useRouteContext();
   return (
-    <RoleProvider initial="site">
+    <RoleProvider initial="site" initialUser={dbUser}>
       <Outlet />
     </RoleProvider>
   );

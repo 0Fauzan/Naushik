@@ -5,16 +5,23 @@ import { PageHeader } from "@/components/app/page-header";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { auditLogs } from "@/lib/mock-data";
+import { getAuditLogs } from "@/server/audit";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export const Route = createFileRoute("/admin/audit")({
   head: () => ({ meta: [{ title: "Audit Logs · Naushik Admin" }] }),
+  loader: async () => {
+    const auditLogs = await getAuditLogs();
+    return { auditLogs };
+  },
   component: AdminAudit,
 });
 
 function AdminAudit() {
+  const loaderData = Route.useLoaderData();
+  const auditLogs = Array.isArray(loaderData.auditLogs) ? loaderData.auditLogs : [];
+
   function exportPdf() {
     const doc = new jsPDF({ orientation: "landscape" });
     doc.setFontSize(14);
@@ -25,7 +32,7 @@ function AdminAudit() {
     autoTable(doc, {
       startY: 26,
       head: [["When", "User", "Action", "Entity", "From", "To"]],
-      body: auditLogs.map((a) => [a.date, a.user, a.action, a.entity, a.from ?? "—", a.to ?? "—"]),
+      body: auditLogs.map((a) => [new Date(a.date).toLocaleString(), a.user, a.action, a.entity, (a as any).from ?? "—", (a as any).to ?? "—"]),
       styles: { fontSize: 8, cellPadding: 2 },
       headStyles: { fillColor: [30, 41, 59] },
     });
@@ -61,12 +68,12 @@ function AdminAudit() {
             <tbody className="divide-y divide-border">
               {auditLogs.map((a) => (
                 <tr key={a.id} className="hover:bg-muted/30">
-                  <td className="px-4 py-3 text-xs tabular-nums text-muted-foreground">{a.date}</td>
+                  <td className="px-4 py-3 text-xs tabular-nums text-muted-foreground">{new Date(a.date).toLocaleString()}</td>
                   <td className="px-4 py-3 font-semibold">{a.user}</td>
                   <td className="px-4 py-3">{a.action}</td>
                   <td className="px-4 py-3 font-mono text-xs">{a.entity}</td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{a.from ?? "—"}</td>
-                  <td className="px-4 py-3 text-xs">{a.to ?? "—"}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">{(a as any).from ?? "—"}</td>
+                  <td className="px-4 py-3 text-xs">{(a as any).to ?? "—"}</td>
                 </tr>
               ))}
             </tbody>
@@ -77,10 +84,10 @@ function AdminAudit() {
             <div key={a.id} className="p-4 text-sm">
               <div className="flex items-center justify-between">
                 <span className="font-semibold">{a.user}</span>
-                <span className="text-xs text-muted-foreground tabular-nums">{a.date}</span>
+                <span className="text-xs text-muted-foreground tabular-nums">{new Date(a.date).toLocaleString()}</span>
               </div>
               <div className="mt-1">{a.action} · <span className="font-mono text-xs">{a.entity}</span></div>
-              {a.from && <div className="mt-1 text-xs text-muted-foreground">{a.from} → <span className="text-foreground">{a.to}</span></div>}
+              {(a as any).from && <div className="mt-1 text-xs text-muted-foreground">{(a as any).from} → <span className="text-foreground">{(a as any).to}</span></div>}
             </div>
           ))}
         </div>

@@ -9,24 +9,36 @@ import { StatusBadge } from "@/components/app/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { workers as mockWorkers } from "@/lib/mock-data";
 import { enqueueAction } from "@/lib/offline/queue";
+import { getWorkers } from "@/server/workers";
 
 export const Route = createFileRoute("/site/workforce")({
   head: () => ({ meta: [{ title: "Workforce · Naushik Site" }] }),
+  loader: () => getWorkers(),
   component: SiteWorkforce,
 });
 
 type Status = "present" | "absent" | "leave";
 
 function SiteWorkforce() {
+  const dbWorkers = Route.useLoaderData();
+  const allWorkers = Array.isArray(dbWorkers) ? dbWorkers : [];
   const [state, setState] = useState<Record<string, Status>>(
-    Object.fromEntries(mockWorkers.map(w => [w.id, w.status]))
+    Object.fromEntries(allWorkers.map((w: any) => [w.id, w.status || "present"]))
   );
   const [saving, setSaving] = useState(false);
   const present = Object.values(state).filter(s => s === "present").length;
   const absent = Object.values(state).filter(s => s === "absent").length;
   const leave = Object.values(state).filter(s => s === "leave").length;
+
+  const tradeCounts = allWorkers.reduce((acc: Record<string, number>, w: any) => {
+    if (state[w.id] === "present" && w.trade) {
+      acc[w.trade] = (acc[w.trade] || 0) + 1;
+    }
+    return acc;
+  }, {});
+  const deploymentStats = Object.entries(tradeCounts).map(([trade, count]) => ({ trade, count })).sort((a, b) => b.count - a.count);
+
 
   const save = async () => {
     setSaving(true);
@@ -48,19 +60,20 @@ function SiteWorkforce() {
       />
 
       <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
-        <KpiCard label="Present" value={String(present)} icon={Users} accent="success" />
-        <KpiCard label="Absent" value={String(absent)} icon={Users} accent="destructive" />
-        <KpiCard label="On leave" value={String(leave)} icon={Users} accent="warning" />
-        <KpiCard label="Productivity" value="91%" delta={4} icon={Users} accent="gold" />
+        <KpiCard label="Present" value={String(present)} hint="No data yet" icon={Users} accent="success" />
+        <KpiCard label="Absent" value={String(absent)} hint="No data yet" icon={Users} accent="destructive" />
+        <KpiCard label="On leave" value={String(leave)} hint="No data yet" icon={Users} accent="warning" />
+        <KpiCard label="Productivity" value="0%" hint="No data yet" icon={Users} accent="gold" />
       </div>
 
       <Card className="mt-6">
         <CardHeader><CardTitle>Workers</CardTitle></CardHeader>
         <CardContent className="divide-y divide-border p-0">
-          {mockWorkers.map((w) => (
-            <div key={w.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3">
+          {allWorkers.length > 0 ? (
+            allWorkers.map((w: any) => (
+              <div key={w.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3">
               <Avatar className="h-9 w-9 shrink-0">
-                <AvatarFallback className="bg-muted text-xs font-bold">{w.name.split(" ").map(s => s[0]).join("")}</AvatarFallback>
+                <AvatarFallback className="bg-muted text-xs font-bold">{w.name ? w.name.split(" ").map((s: string) => s[0]).join("") : "?"}</AvatarFallback>
               </Avatar>
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold">{w.name}</div>
@@ -85,7 +98,13 @@ function SiteWorkforce() {
                 })}
               </div>
             </div>
-          ))}
+          ))) : (
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <Users className="mb-2 h-8 w-8 text-muted-foreground/50" />
+              <p className="text-sm font-medium text-foreground">No workers assigned to this site yet</p>
+              <p className="mt-1 text-xs text-muted-foreground">Please assign workers from the admin dashboard to start tracking attendance.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -93,21 +112,16 @@ function SiteWorkforce() {
         <CardHeader><CardTitle>Today's deployment</CardTitle></CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[
-              { trade: "Masons", count: 24 },
-              { trade: "Bar Benders", count: 18 },
-              { trade: "Carpenters", count: 12 },
-              { trade: "Electricians", count: 8 },
-              { trade: "Plumbers", count: 6 },
-              { trade: "Welders", count: 4 },
-              { trade: "Helpers", count: 14 },
-              { trade: "Operators", count: 5 },
-            ].map((t) => (
+            {deploymentStats.length > 0 ? deploymentStats.map((t) => (
               <div key={t.trade} className="rounded-md border border-border p-3">
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t.trade}</div>
                 <div className="mt-1 text-lg font-bold tabular-nums">{t.count}</div>
               </div>
-            ))}
+            )) : (
+              <div className="col-span-full py-6 text-center text-sm text-muted-foreground">
+                No deployment data available for today.
+              </div>
+            )}
           </div>
           {/* keep status badge used somewhere to avoid unused warnings */}
           <div className="mt-4 text-xs text-muted-foreground">Workforce status legend: <StatusBadge value="present" /> <StatusBadge value="absent" /> <StatusBadge value="leave" /></div>

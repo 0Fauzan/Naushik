@@ -1,22 +1,38 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useRouter } from "@tanstack/react-router";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard, FolderKanban, Users, ShoppingCart, Boxes, Wallet,
   FileBarChart2, ShieldCheck, ClipboardList, HardHat, Package, Wrench,
-  AlertTriangle, FileText, Moon, Sun, LogOut, Menu, Bell, Search, MessageCircle,
+  AlertTriangle, FileText, Moon, Sun, LogOut, Menu, Bell, Search, Settings, Download, Plus
 } from "lucide-react";
 import { useRole, type Role } from "@/lib/role-context";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { SyncIndicator } from "@/components/app/sync-indicator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface NavItem { to: string; label: string; icon: typeof LayoutDashboard; badge?: string; }
 
@@ -24,7 +40,7 @@ const ADMIN_NAV: NavItem[] = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/admin/projects", label: "Projects", icon: FolderKanban },
   { to: "/admin/workforce", label: "Workforce", icon: Users },
-  { to: "/admin/procurement", label: "Procurement", icon: ShoppingCart, badge: "2" },
+  { to: "/admin/procurement", label: "Procurement", icon: ShoppingCart },
   { to: "/admin/inventory", label: "Inventory", icon: Boxes },
   { to: "/admin/finance", label: "Finance", icon: Wallet },
   { to: "/admin/reports", label: "Reports", icon: FileBarChart2 },
@@ -39,7 +55,7 @@ const SITE_NAV: NavItem[] = [
   { to: "/site/materials", label: "Materials", icon: Package },
   { to: "/site/inventory", label: "Inventory", icon: Boxes },
   { to: "/site/equipment", label: "Equipment", icon: Wrench },
-  { to: "/site/issues", label: "Issues & Safety", icon: AlertTriangle, badge: "3" },
+  { to: "/site/issues", label: "Issues & Safety", icon: AlertTriangle },
   { to: "/site/documents", label: "Documents", icon: FileText },
 ];
 
@@ -48,152 +64,363 @@ const MOBILE_NAV: Record<Role, NavItem[]> = {
   site: [SITE_NAV[0], SITE_NAV[2], SITE_NAV[4], SITE_NAV[7], SITE_NAV[3]],
 };
 
-function Brand() {
+function BrandIcon() {
   return (
-    <div className="flex items-center gap-2.5">
-      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-gold text-gold-foreground font-black text-base shadow-sm">N</div>
-      <div className="min-w-0">
-        <div className="text-sm font-bold tracking-tight text-sidebar-foreground leading-tight">Naushik</div>
-        <div className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/60">Associates</div>
-      </div>
+    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-background text-primary font-black text-xl shadow-sm">
+      N
     </div>
-  );
-}
-
-function NavList({ items, currentPath, onNavigate }: { items: NavItem[]; currentPath: string; onNavigate?: () => void; }) {
-  return (
-    <nav className="flex flex-col gap-0.5 px-2">
-      {items.map((item) => {
-        const active = currentPath === item.to || currentPath.startsWith(item.to + "/");
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.to}
-            to={item.to}
-            onClick={onNavigate}
-            className={cn(
-              "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/75 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
-            )}
-          >
-            <Icon className={cn("h-4 w-4 shrink-0", active ? "text-gold" : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground")} />
-            <span className="flex-1 truncate">{item.label}</span>
-            {item.badge && (
-              <span className="rounded-full bg-gold/90 px-1.5 py-0.5 text-[10px] font-bold text-gold-foreground">{item.badge}</span>
-            )}
-          </Link>
-        );
-      })}
-    </nav>
   );
 }
 
 function SidebarContent({ items, currentPath, onNavigate }: { items: NavItem[]; currentPath: string; onNavigate?: () => void; }) {
   const { user, role } = useRole();
   return (
-    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex h-16 items-center border-b border-sidebar-border px-5">
-        <Brand />
+    <div className="flex h-full flex-col items-center bg-sidebar dark:bg-sidebar/60 dark:backdrop-blur-2xl dark:border-r dark:border-white/5 text-sidebar-foreground pt-6 pb-6">
+      <div className="mb-8">
+        <BrandIcon />
       </div>
-      <div className="flex-1 overflow-y-auto py-4">
-        <div className="mb-2 px-5 text-[10px] font-semibold uppercase tracking-[0.16em] text-sidebar-foreground/40">
-          {role === "admin" ? "Headquarters" : "Site Office"}
-        </div>
-        <NavList items={items} currentPath={currentPath} onNavigate={onNavigate} />
+      <div className="flex-1 flex flex-col items-center gap-4 w-full px-4 overflow-y-auto no-scrollbar">
+        {items.map((item) => {
+          const active = currentPath === item.to || currentPath.startsWith(item.to + "/");
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              onClick={onNavigate}
+              title={item.label}
+              className={cn(
+                "relative flex h-12 w-12 items-center justify-center rounded-2xl transition-colors",
+                active ? "bg-background/20 text-white shadow-inner" : "text-sidebar-foreground/70 hover:bg-background/10 hover:text-white",
+              )}
+            >
+              <Icon className={cn("h-5 w-5", active && "text-white")} />
+              {item.badge && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[9px] font-bold text-gold-foreground border-2 border-primary">
+                  {item.badge}
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </div>
-      <div className="border-t border-sidebar-border p-3">
-        <div className="flex items-center gap-3 rounded-md px-2 py-2">
-          <Avatar className="h-9 w-9 border border-sidebar-border">
-            <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground text-xs font-bold">
+      <div className="mt-auto pt-6 flex flex-col items-center gap-4 w-full">
+         <Link to="/settings" title="Settings" className="flex h-12 w-12 items-center justify-center rounded-2xl text-sidebar-foreground/70 hover:bg-background/10 hover:text-white">
+            <Settings className="h-5 w-5" />
+         </Link>
+         <Link to="/" title="Sign out" className="flex h-12 w-12 items-center justify-center rounded-2xl text-sidebar-foreground/70 hover:bg-background/10 hover:text-white">
+            <LogOut className="h-5 w-5" />
+         </Link>
+         <Avatar className="h-10 w-10 border-2 border-background/20">
+            <AvatarFallback className="bg-gold text-gold-foreground text-xs font-bold">
               {user.name.split(" ").map(s => s[0]).slice(0, 2).join("")}
             </AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-semibold">{user.name}</div>
-            <div className="truncate text-xs text-sidebar-foreground/60">{role === "admin" ? "Administrator" : "Site Manager"}</div>
-          </div>
-          <Link to="/" className="rounded-md p-1.5 text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground" aria-label="Sign out">
-            <LogOut className="h-4 w-4" />
-          </Link>
-        </div>
+         </Avatar>
       </div>
     </div>
   );
 }
 
-function TopBar({ title, items, currentPath }: { title: string; items: NavItem[]; currentPath: string; }) {
-  const { user, role } = useRole();
+function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string; }) {
   const [dark, setDark] = useState(false);
-  useEffect(() => { setDark(document.documentElement.classList.contains("dark")); }, []);
+  const { user, updateUser } = useRole();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isNewBoardOpen, setIsNewBoardOpen] = useState(false);
+  const [name, setName] = useState(user.name);
+  const [email, setEmail] = useState(user.email);
+  const [pin, setPin] = useState("");
+  const [boardData, setBoardData] = useState({ name: "", client: "", location: "", manager: "", budget: "" });
+  const [isExporting, setIsExporting] = useState(false);
+  const [isCreatingBoard, setIsCreatingBoard] = useState(false);
+  const [managersList, setManagersList] = useState<any[]>([]);
+  const [locationsList, setLocationsList] = useState<any[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isNewBoardOpen) {
+      if (managersList.length === 0) {
+        import("@/server/workforce").then((m) => {
+          m.getSiteManagers().then(setManagersList).catch(console.error);
+        });
+      }
+      if (locationsList.length === 0) {
+        import("@/server/sites").then((s) => {
+          s.getSites().then(setLocationsList).catch(console.error);
+        });
+      }
+    }
+  }, [isNewBoardOpen]);
+
+  useEffect(() => {
+    setName(user.name);
+    setEmail(user.email);
+  }, [user]);
+  
+  useEffect(() => { 
+    const isDark = localStorage.getItem("theme") === "dark" || (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    setDark(isDark); 
+  }, []);
+
+  const saveProfile = async () => {
+    updateUser({ name, email });
+    try {
+      const { updateProfile } = await import("@/server/auth");
+      await updateProfile({ data: { name, email, pin: pin || null } });
+      toast.success("Profile and PIN updated successfully!");
+      setIsSettingsOpen(false);
+      setPin(""); // reset pin field
+    } catch (err) {
+      toast.error("Failed to update profile settings");
+    }
+  };
+  
   const toggleTheme = () => {
-    document.documentElement.classList.toggle("dark");
-    setDark(document.documentElement.classList.contains("dark"));
+    const isDark = document.documentElement.classList.toggle("dark");
+    setDark(isDark);
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  };
+
+  const capitalize = (str: string) => str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
+
+  const handleCreateBoard = async () => {
+    if (!boardData.name.trim()) {
+      toast.error("Project Name cannot be empty");
+      return;
+    }
+    setIsCreatingBoard(true);
+    try {
+      const { createProject } = await import("@/server/projects");
+      await createProject({ data: { ...boardData, budget: Number(boardData.budget) || 0 } });
+      toast.success("New project created!");
+      setIsNewBoardOpen(false);
+      setBoardData({ name: "", client: "", location: "", manager: "", budget: "" });
+      router.invalidate();
+    } catch (e) {
+      toast.error("Failed to create project");
+    } finally {
+      setIsCreatingBoard(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    setIsExporting(true);
+    try {
+      const { getProjects } = await import("@/server/projects");
+      const projects = await getProjects();
+      const csv = ["Project ID,Name,Client,Location,Budget,Spent,Status"];
+      projects.forEach((p: any) => csv.push(`${p.projectId},"${p.name}","${p.client || ''}","${p.location || ''}",${p.budget},${p.spent},${p.status}`));
+      const blob = new Blob([csv.join("\\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "naushik_projects_export.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Exported to Excel successfully");
+      setIsExportOpen(false);
+    } catch (e) {
+      toast.error("Failed to export data");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      const { getProjects } = await import("@/server/projects");
+      const projects = await getProjects();
+      
+      const doc = new jsPDF();
+      doc.setFontSize(20);
+      doc.text("Project Portfolio Export", 14, 22);
+      doc.setFontSize(11);
+      doc.text(`Generated on ${new Date().toLocaleDateString()}`, 14, 30);
+      
+      const tableData = projects.map((p: any) => [
+        p.projectId,
+        p.name,
+        p.client || "-",
+        p.location || "-",
+        `Rs. ${p.budget?.toLocaleString() || "0"}`,
+        `Rs. ${p.spent?.toLocaleString() || "0"}`,
+        p.status
+      ]);
+
+      autoTable(doc, {
+        startY: 36,
+        head: [["ID", "Name", "Client", "Location", "Budget", "Spent", "Status"]],
+        body: tableData,
+      });
+
+      const pdfBlob = doc.output("blob");
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "naushik_projects_export.pdf";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Exported to PDF successfully");
+      setIsExportOpen(false);
+    } catch (e) {
+      toast.error("Failed to export PDF");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center gap-2 overflow-visible border-b border-border bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:gap-3 sm:px-4 md:px-6">
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu">
-            <Menu className="h-5 w-5" />
+    <header className="sticky top-0 z-40 flex h-20 items-center justify-between px-6 lg:px-10">
+      <div className="flex items-center gap-6 lg:gap-10">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-accent md:hidden"
+          >
+            <Menu className="h-4 w-4" />
+          </button>
+          <div className="hidden items-center gap-2 md:flex">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Real-time sync active</span>
+          </div>
+        </div>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[100px] border-r-0 p-0 bg-transparent shadow-none">
+            <SheetTitle className="sr-only">Navigation</SheetTitle>
+            <div className="h-full w-full rounded-r-[2.5rem] overflow-hidden shadow-2xl">
+               <SidebarContent items={items} currentPath={currentPath} />
+            </div>
+          </SheetContent>
+        </Sheet>
+
+
+      </div>
+
+      <div className="relative hidden md:flex items-center flex-1 max-w-md mx-6">
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input placeholder="Search or type command" className="h-11 w-full rounded-full pl-11 bg-background border-border/50 shadow-sm focus-visible:ring-primary/20" />
+      </div>
+
+      <div className="flex items-center gap-3 lg:gap-4">
+        <div className="hidden lg:flex items-center rounded-full bg-primary/10 p-1">
+           <button onClick={() => dark && toggleTheme()} className={cn("flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all", !dark ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+              Light
+           </button>
+           <button onClick={() => !dark && toggleTheme()} className={cn("flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all", dark ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+              <Moon className="h-3.5 w-3.5" /> Dark
+           </button>
+        </div>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="icon" className="h-10 w-10 rounded-full border-border/50 bg-background shadow-sm hover:bg-accent relative">
+              <Bell className="h-4 w-4" />
+              {/* Commenting out badge since we are flushing notifications */}
+              {/* <span className="absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full bg-gold" /> */}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-80">
+            <div className="flex flex-col gap-2 text-center p-4">
+              <Bell className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-20" />
+              <p className="text-sm font-semibold">No new notifications</p>
+              <p className="text-xs text-muted-foreground">You're all caught up!</p>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <Link to="/settings" className="hidden sm:inline-flex">
+          <Button variant="outline" size="icon" className="h-10 w-10 rounded-full border-border/50 bg-background shadow-sm hover:bg-accent">
+            <Settings className="h-4 w-4" />
           </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-72 border-r-0 p-0">
-          <SheetTitle className="sr-only">Navigation</SheetTitle>
-          <SidebarContent items={items} currentPath={currentPath} />
-        </SheetContent>
-      </Sheet>
+        </Link>
 
-      <div className="min-w-0 flex-1">
-        <div className="hidden text-[11px] uppercase tracking-[0.14em] text-muted-foreground sm:block">{role === "admin" ? "Admin Portal" : "Site Portal"}</div>
-        <h1 className="truncate text-base font-bold tracking-tight md:text-lg">{title}</h1>
+        <Dialog open={isExportOpen} onOpenChange={setIsExportOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="hidden lg:flex h-10 rounded-full border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 shadow-sm gap-2 px-4">
+               <Download className="h-4 w-4" /> Export data
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Export Data</DialogTitle>
+              <DialogDescription>Select the data you want to export.</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <Button variant="outline" disabled={isExporting} onClick={handleExportExcel}>{isExporting ? "Exporting..." : "Export as Excel"}</Button>
+              <Button variant="outline" disabled={isExporting} onClick={handleExportPDF}>{isExporting ? "Exporting..." : "Export as PDF"}</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isNewBoardOpen} onOpenChange={setIsNewBoardOpen}>
+          <DialogTrigger asChild>
+            <Button className="h-10 rounded-full bg-sidebar text-sidebar-foreground hover:bg-sidebar/90 shadow-glass gap-2 px-5 hidden sm:flex">
+               Add new board
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Create New Board</DialogTitle>
+              <DialogDescription>Setup a new project board.</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-1.5">
+                <Label>Project Name</Label>
+                <Input placeholder="e.g. Phase 2 Construction" value={boardData.name} onChange={(e) => setBoardData({ ...boardData, name: capitalize(e.target.value) })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Client</Label>
+                <Input placeholder="Client Name" value={boardData.client} onChange={(e) => setBoardData({ ...boardData, client: capitalize(e.target.value) })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Location</Label>
+                <Input list="location-suggestions" placeholder="Project Location" value={boardData.location} onChange={(e) => setBoardData({ ...boardData, location: capitalize(e.target.value) })} />
+                <datalist id="location-suggestions">
+                  {locationsList.map((loc) => (
+                    <option key={loc.id} value={loc.name} />
+                  ))}
+                </datalist>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Manager</Label>
+                <Select value={boardData.manager} onValueChange={(val) => setBoardData({ ...boardData, manager: val })}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Manager" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {managersList.map((m) => (
+                      <SelectItem key={m.id} value={m.name}>
+                        {m.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Budget (₹)</Label>
+                <Input type="number" placeholder="0" value={boardData.budget} onChange={(e) => setBoardData({ ...boardData, budget: e.target.value })} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button disabled={isCreatingBoard} onClick={handleCreateBoard}>{isCreatingBoard ? "Saving..." : "Save Project"}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      <div className="relative hidden lg:block">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input placeholder="Search projects, requests, workers…" className="h-9 w-72 pl-9" />
-      </div>
-
-      <div className="hidden sm:block">
-        <SyncIndicator />
-      </div>
-
-      <Button variant="outline" size="sm" className="hidden gap-1.5 border-success/40 bg-success/5 text-success hover:bg-success/10 hover:text-success lg:inline-flex" asChild>
-        <a href="https://wa.me/919847012345" target="_blank" rel="noreferrer">
-          <MessageCircle className="h-4 w-4" /> WhatsApp
-        </a>
-      </Button>
-
-      <Button variant="ghost" size="icon" aria-label="Toggle theme" onClick={toggleTheme} className="hidden sm:inline-flex">
-        {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-      </Button>
-
-      <Button variant="ghost" size="icon" className="relative hidden sm:inline-flex" aria-label="Notifications">
-        <Bell className="h-4 w-4" />
-        <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-gold" />
-      </Button>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="ml-auto h-9 shrink-0 gap-2 px-1.5 sm:ml-0 sm:px-2">
-            <Avatar className="h-8 w-8 shrink-0">
-              <AvatarFallback className="bg-primary text-primary-foreground text-[11px] font-bold">
-                {user.name.split(" ").map(s => s[0]).slice(0, 2).join("").toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <span className="hidden max-w-[120px] truncate text-sm font-medium lg:inline">{user.name}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" collisionPadding={8} className="z-50 w-56">
-          <DropdownMenuLabel>
-            <div className="text-sm font-semibold">{user.name}</div>
-            <div className="text-xs font-normal text-muted-foreground">{user.email}</div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem asChild><Link to="/">Switch role</Link></DropdownMenuItem>
-          <DropdownMenuItem asChild><Link to="/">Sign out</Link></DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
     </header>
   );
 }
@@ -231,12 +458,14 @@ export function AppShell({ children, title }: { children: ReactNode; title: stri
 
   return (
     <div className="flex min-h-screen bg-background">
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 lg:block">
-        <SidebarContent items={items} currentPath={currentPath} />
+      <aside className="sticky top-0 hidden h-screen w-[104px] shrink-0 lg:block py-6 pl-0">
+        <div className="h-full w-full rounded-r-[3rem] overflow-hidden shadow-2xl">
+           <SidebarContent items={items} currentPath={currentPath} />
+        </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col overflow-visible">
-        <TopBar title={title} items={items} currentPath={currentPath} />
-        <main className="flex-1 px-4 py-6 pb-24 md:px-6 lg:px-8 lg:pb-8">{children}</main>
+        <TopBar items={items} currentPath={currentPath} />
+        <main className="flex-1 px-4 sm:px-6 lg:px-10 py-6 pb-24 lg:pb-12">{children}</main>
       </div>
       <BottomNav items={mobileItems} currentPath={currentPath} />
     </div>

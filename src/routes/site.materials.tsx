@@ -6,21 +6,29 @@ import { AppShell } from "@/components/app/app-shell";
 import { PageHeader } from "@/components/app/page-header";
 import { StatusBadge } from "@/components/app/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { materialRequests, inr } from "@/lib/mock-data";
+import { inr } from "@/lib/mock-data";
 import { enqueueAction } from "@/lib/offline/queue";
+import { getMaterialRequests, createMaterialRequest } from "@/server/procurement";
+import { useRouter } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/site/materials")({
   head: () => ({ meta: [{ title: "Materials · Naushik Site" }] }),
+  loader: () => getMaterialRequests(),
   component: SiteMaterials,
 });
 
 function SiteMaterials() {
-  const mine = materialRequests.filter(m => m.project === "Marina Bay Tower");
+  const router = useRouter();
+  const dbReqs = Route.useLoaderData();
+  const allReqs = Array.isArray(dbReqs) ? dbReqs : [];
+  const mine = allReqs.filter((m: any) => m.project === "Marina Bay Tower");
+  
   const [item, setItem] = useState("");
   const [qty, setQty] = useState("");
   const [unit, setUnit] = useState("bags");
@@ -34,13 +42,18 @@ function SiteMaterials() {
       return;
     }
     setSubmitting(true);
-    await enqueueAction("material.request", `${item} · ${qty} ${unit}`, {
-      item, qty: Number(qty), unit, priority, justification,
-    });
-    const online = typeof navigator !== "undefined" ? navigator.onLine : true;
-    toast.success(online ? "Request submitted — syncing" : "Saved offline — will sync when online");
-    setItem(""); setQty(""); setJustification("");
-    setSubmitting(false);
+    try {
+      await createMaterialRequest({ 
+        data: { item, qty: Number(qty), unit, priority, project: "Marina Bay Tower", requestedBy: "Site Engineer" } 
+      });
+      toast.success("Request submitted successfully");
+      setItem(""); setQty(""); setJustification("");
+      router.invalidate();
+    } catch (e) {
+      toast.error("Failed to submit request");
+    } finally {
+      setSubmitting(false);
+    }
   };
   return (
     <AppShell title="Materials">
@@ -50,7 +63,7 @@ function SiteMaterials() {
         <Card>
           <CardHeader><CardTitle>My requests</CardTitle></CardHeader>
           <CardContent className="space-y-2">
-            {mine.map((m) => (
+            {mine.map((m: any) => (
               <div key={m.id} className="rounded-md border border-border p-3">
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
                   <div className="min-w-0">
@@ -58,7 +71,7 @@ function SiteMaterials() {
                       <span className="truncate text-sm font-semibold">{m.item}</span>
                       <StatusBadge value={m.priority} />
                     </div>
-                    <div className="text-xs text-muted-foreground">{m.id} · {m.qty} {m.unit} · {m.date}</div>
+                    <div className="text-xs text-muted-foreground">{m.id} · {m.qty}{m.unit ? ` ${m.unit}` : ''}</div>
                   </div>
                   <div className="text-right">
                     <StatusBadge value={m.status} />
@@ -66,9 +79,32 @@ function SiteMaterials() {
                   </div>
                 </div>
                 <div className="mt-2 flex gap-2">
-                  <Button variant="outline" size="sm" className="h-7 px-2 text-xs">View</Button>
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-7 px-2 text-xs">View</Button>
+                    </SheetTrigger>
+                    <SheetContent>
+                      <SheetHeader>
+                        <SheetTitle>Material Details: {m.item}</SheetTitle>
+                      </SheetHeader>
+                      <div className="mt-6 space-y-4 text-sm">
+                        <div className="flex justify-between border-b pb-2">
+                          <span className="text-muted-foreground">Category</span>
+                          <span className="font-medium">{m.category}</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-2">
+                          <span className="text-muted-foreground">Current Stock</span>
+                          <span className="font-bold">{stock} {m.unit}</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-2">
+                          <span className="text-muted-foreground">Value</span>
+                          <span className="font-medium">{inr(m.value || 0)}</span>
+                        </div>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
                   <Button variant="outline" size="sm" className="h-7 gap-1.5 border-success/40 px-2 text-xs text-success hover:bg-success/10 hover:text-success" asChild>
-                    <a href="https://wa.me/919847012345" target="_blank" rel="noreferrer"><MessageCircle className="h-3 w-3" /> Update admin</a>
+                    <a href={`https://wa.me/919999999999?text=Update%20regarding%20${encodeURIComponent(m.item)}`} target="_blank" rel="noreferrer" className="flex items-center gap-1"><MessageCircle className="h-3 w-3" /> Update admin</a>
                   </Button>
                 </div>
               </div>

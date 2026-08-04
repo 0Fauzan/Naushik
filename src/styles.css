@@ -61,6 +61,7 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --shadow-glass: 0 10px 40px -10px oklch(0 0 0 / 0.08);
 }
 
 /*
@@ -72,9 +73,9 @@
  */
 
 :root {
-  --radius: 0.625rem;
+  --radius: 1.25rem;
 
-  --background: oklch(0.995 0.002 240);
+  --background: oklch(0.98 0.01 240);
   --foreground: oklch(0.18 0.01 240);
 
   --card: oklch(1 0 0);
@@ -188,8 +189,18 @@
 }
 
 @layer base {
-  * {
+  *, ::before, ::after {
     border-color: var(--color-border);
+  }
+
+  button, a, input, select, textarea, [role="button"], .card, .glass-panel {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
@@ -199,7 +210,27 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  .dark body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;
+    background: radial-gradient(circle at 20% 30%, oklch(0.35 0.15 240 / 0.15), transparent 40%),
+                radial-gradient(circle at 80% 80%, oklch(0.3 0.15 75 / 0.12), transparent 40%),
+                radial-gradient(circle at 50% 50%, oklch(0.25 0.1 155 / 0.1), transparent 50%);
+    pointer-events: none;
+  }
+
   h1, h2, h3, h4 {
     letter-spacing: -0.02em;
   }
+}
+
+/* Fix for Chrome autofill breaking transparent inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    transition: background-color 5000s ease-in-out 0s;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
 }

@@ -1,14 +1,20 @@
 import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
-import { db } from "../db";
-import { workers } from "../db/schema";
 import { authMiddleware } from "./middleware";
 
-export const getWorkers = createServerFn("GET", async (_, ctx) => {
+export const getWorkers = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .handler(async () => {
+  const { db } = await import("../db");
+  const { workers } = await import("../db/schema");
   return await db.select().from(workers);
-}).middleware([authMiddleware]);
+});
 
-export const getWorker = createServerFn("GET", async (id: number, ctx) => {
+export const getWorker = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .handler(async ({ data: id }: { data: number }) => {
+  const { db } = await import("../db");
+  const { workers } = await import("../db/schema");
   const [worker] = await db.select().from(workers).where(eq(workers.id, id));
   return worker;
-}).middleware([authMiddleware]);
+});

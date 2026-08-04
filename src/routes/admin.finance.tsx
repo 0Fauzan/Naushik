@@ -7,14 +7,63 @@ import { KpiCard } from "@/components/app/kpi-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { projects, inr, kpiTrend } from "@/lib/mock-data";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+import { toast } from "sonner";
+import { inr } from "@/lib/mock-data";
+import { getProjects } from "@/server/projects";
+import { getMetrics } from "@/server/metrics";
+import { createStatement } from "@/server/finance";
+import { useRouter } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin/finance")({
   head: () => ({ meta: [{ title: "Finance · Naushik Admin" }] }),
+  loader: async () => {
+    const [projects, metrics] = await Promise.all([getProjects(), getMetrics()]);
+    return { projects, metrics };
+  },
   component: AdminFinance,
 });
 
 function AdminFinance() {
+  const loaderData = Route.useLoaderData();
+  const projects = Array.isArray(loaderData.projects) ? loaderData.projects : [];
+  const kpiTrend = loaderData.metrics?.kpiTrend || [];
+  
+  const [open, setOpen] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  
+  const [statementType, setStatementType] = useState("cashflow");
+  const [statementPeriod, setStatementPeriod] = useState("mtd");
+  const router = useRouter();
+
+  const handleGenerate = async () => {
+    setGenerating(true);
+    try {
+      await createStatement({ data: { type: statementType, period: statementPeriod } });
+      
+      // Generate a mock PDF download to simulate the statement file
+      const csv = [`Statement Type,Period\\n"${statementType}","${statementPeriod}"`];
+      const blob = new Blob([csv.join("\\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `finance_statement_${statementType}_${statementPeriod}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      toast.success("Statement generated and saved.");
+      setOpen(false);
+      router.invalidate();
+    } catch (e) {
+      toast.error("Failed to generate statement");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const totalBudget = projects.reduce((s, p) => s + p.budget, 0);
   const totalSpent = projects.reduce((s, p) => s + p.spent, 0);
   const cashflow = kpiTrend.map((k) => ({ month: k.month, inflow: k.planned * 1.8, outflow: k.actual * 1.6 }));
@@ -24,14 +73,52 @@ function AdminFinance() {
       <PageHeader
         title="Financial command centre"
         description="Budgets, expenses, vendor payments and variance analysis."
-        actions={<Button size="sm">Generate Statement</Button>}
+        actions={
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">Generate Statement</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Generate Financial Statement</DialogTitle></DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="space-y-1.5">
+                  <Label>Statement Type</Label>
+                  <Select value={statementType} onValueChange={setStatementType}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cashflow">Cash Flow</SelectItem>
+                      <SelectItem value="pnl">Profit & Loss</SelectItem>
+                      <SelectItem value="balance">Balance Sheet</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Period</Label>
+                  <Select value={statementPeriod} onValueChange={setStatementPeriod}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mtd">Month to Date</SelectItem>
+                      <SelectItem value="ytd">Year to Date</SelectItem>
+                      <SelectItem value="last_month">Last Month</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button disabled={generating} onClick={handleGenerate}>
+                  {generating ? "Generating..." : "Download PDF"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        }
       />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KpiCard label="Portfolio Budget" value={inr(totalBudget)} icon={Wallet} accent="blue" />
-        <KpiCard label="Spent to Date" value={inr(totalSpent)} delta={6} icon={CreditCard} accent="gold" />
-        <KpiCard label="Utilisation" value={`${Math.round((totalSpent / totalBudget) * 100)}%`} delta={3} icon={TrendingUp} accent="success" />
-        <KpiCard label="Cost Overrun" value={inr(28_400_000)} delta={-2} icon={AlertOctagon} accent="destructive" />
+        <KpiCard label="Portfolio Budget" value={inr(totalBudget)} hint="No data yet" icon={Wallet} accent="blue" />
+        <KpiCard label="Spent to Date" value={inr(totalSpent)} hint="No data yet" icon={CreditCard} accent="gold" />
+        <KpiCard label="Utilisation" value={`${totalBudget ? Math.round((totalSpent / totalBudget) * 100) : 0}%`} hint="No data yet" icon={TrendingUp} accent="success" />
+        <KpiCard label="Cost Overrun" value={inr(0)} hint="No data yet" icon={AlertOctagon} accent="destructive" />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
@@ -55,20 +142,7 @@ function AdminFinance() {
         <Card>
           <CardHeader><CardTitle>Vendor payments</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {[
-              { name: "Ultratech Cement Ltd.", due: "₹18.4 L", days: 3 },
-              { name: "TATA Steel Tinplate", due: "₹42.7 L", days: 7 },
-              { name: "ACC Ready Mix", due: "₹9.8 L", days: 1 },
-              { name: "Saint-Gobain Glass", due: "₹6.3 L", days: 14 },
-            ].map((v) => (
-              <div key={v.name} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-border p-3">
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-semibold">{v.name}</div>
-                  <div className="text-xs text-muted-foreground">Due in {v.days} day{v.days > 1 ? "s" : ""}</div>
-                </div>
-                <div className="text-sm font-bold tabular-nums">{v.due}</div>
-              </div>
-            ))}
+            <div className="text-sm text-muted-foreground py-8 text-center">No pending payments.</div>
           </CardContent>
         </Card>
       </div>

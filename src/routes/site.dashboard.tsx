@@ -10,34 +10,61 @@ import { StatusBadge } from "@/components/app/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { projects, dprs, materialRequests, issues, workers } from "@/lib/mock-data";
-
+import { getProjects } from "@/server/projects";
+import { getWorkers } from "@/server/workers";
+import { getMaterialRequests } from "@/server/procurement";
+import { getIssues } from "@/server/issues";
+import { getDprs } from "@/server/dpr";
+import { useRole } from "@/lib/role-context";
 export const Route = createFileRoute("/site/dashboard")({
   head: () => ({ meta: [{ title: "Site Dashboard · Naushik" }] }),
+  loader: async () => {
+    const [projects, workers, materialRequests, issues, dprs] = await Promise.all([
+      getProjects(),
+      getWorkers(),
+      getMaterialRequests(),
+      getIssues(),
+      getDprs(),
+    ]);
+    return { projects, workers, materialRequests, issues, dprs };
+  },
   component: SiteDashboard,
 });
 
 function SiteDashboard() {
-  const myProject = projects[0]; // Marina Bay Tower
+  const loaderData = Route.useLoaderData();
+  const projects = Array.isArray(loaderData.projects) ? loaderData.projects : [];
+  const workers = Array.isArray(loaderData.workers) ? loaderData.workers : [];
+  const materialRequests = Array.isArray(loaderData.materialRequests) ? loaderData.materialRequests : [];
+  const issues = Array.isArray(loaderData.issues) ? loaderData.issues : [];
+  const dprs = Array.isArray(loaderData.dprs) ? loaderData.dprs : [];
+
+  const myProject = projects[0];
   const present = workers.filter(w => w.status === "present").length;
-  const myPending = materialRequests.filter(m => m.project === myProject.name && m.status === "pending").length;
-  const openIssues = issues.filter(i => i.project === myProject.name && i.status !== "resolved").length;
+  const myPending = myProject ? materialRequests.filter((m: any) => m.project === myProject.name && m.status === "pending").length : 0;
+  const openIssues = myProject ? issues.filter((i: any) => i.project === myProject.name && i.status !== "resolved").length : 0;
+
+  const { user } = useRole();
+  const managerName = myProject?.manager || user.name;
 
   return (
     <AppShell title="Site Dashboard">
-      <PageHeader title="Good morning, Rajesh" description={`${myProject.name} · ${myProject.location} · Day 489 of 808`} />
+      <PageHeader 
+        title={`Good morning, ${(myProject?.manager || user.name).split(" ")[0]}`} 
+        description={myProject ? `${myProject.name} · ${myProject.location || "No Location"}` : "No active project assigned"} 
+      />
 
       {/* Site banner */}
       <Card className="mb-6 overflow-hidden border-primary/20 bg-gradient-to-br from-primary/8 via-background to-gold/8">
         <CardContent className="grid gap-4 p-5 sm:grid-cols-[1fr_auto] sm:items-end">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-              <MapPin className="h-3 w-3" /> {myProject.location} <span>·</span> <CloudSun className="h-3 w-3" /> 31°C · partly cloudy
+              <MapPin className="h-3 w-3" /> {myProject?.location || "N/A"} <span>·</span> <CloudSun className="h-3 w-3" /> 31°C · partly cloudy
             </div>
-            <h3 className="mt-1 text-xl font-bold tracking-tight">{myProject.name}</h3>
+            <h3 className="mt-1 text-xl font-bold tracking-tight">{myProject?.name || "No Project"}</h3>
             <div className="mt-3 flex items-center gap-3">
-              <Progress value={myProject.progress} className="h-2 flex-1" />
-              <span className="text-sm font-bold tabular-nums">{myProject.progress}%</span>
+              <Progress value={myProject?.progress || 0} className="h-2 flex-1" />
+              <span className="text-sm font-bold tabular-nums">{myProject?.progress || 0}%</span>
             </div>
           </div>
           <Button asChild><Link to="/site/dpr">Submit today's DPR <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
@@ -63,10 +90,10 @@ function SiteDashboard() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KpiCard label="Workers Present" value={`${present}/${workers.length}`} icon={HardHat} accent="success" hint="86% attendance" />
-        <KpiCard label="Today's Progress" value="+0.4%" delta={4} icon={ClipboardList} accent="blue" />
-        <KpiCard label="Pending Materials" value={String(myPending)} icon={Package} accent="warning" />
-        <KpiCard label="Open Issues" value={String(openIssues)} icon={AlertTriangle} accent="destructive" />
+        <KpiCard label="Workers Present" value={`${present}/${workers.length}`} hint="No data yet" icon={HardHat} accent="success" />
+        <KpiCard label="Today's Progress" value="0%" hint="No data yet" icon={ClipboardList} accent="blue" />
+        <KpiCard label="Pending Materials" value={String(myPending)} hint="No data yet" icon={Package} accent="warning" />
+        <KpiCard label="Open Issues" value={String(openIssues)} hint="No data yet" icon={AlertTriangle} accent="destructive" />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
@@ -79,7 +106,7 @@ function SiteDashboard() {
             {dprs.slice(0, 4).map((d) => (
               <div key={d.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 rounded-md border border-border p-3">
                 <div className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-muted text-xs font-bold">
-                  {d.date.slice(8, 10)}
+                  {d.date ? String(d.date).slice(8, 10) : "--"}
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -90,7 +117,7 @@ function SiteDashboard() {
                 </div>
                 <div className="text-right text-xs text-muted-foreground tabular-nums">
                   <div className="font-semibold text-foreground">{d.workers} pax</div>
-                  <div>{d.issues} issue{d.issues !== 1 ? "s" : ""}</div>
+                  <div>{d.issues || 0} issue{(d.issues || 0) !== 1 ? "s" : ""}</div>
                 </div>
               </div>
             ))}
@@ -105,7 +132,7 @@ function SiteDashboard() {
             </Button>
           </CardHeader>
           <CardContent className="space-y-2">
-            {issues.filter(i => i.status !== "resolved").map((i) => (
+            {issues.filter((i: any) => i.status !== "resolved").map((i: any) => (
               <div key={i.id} className="rounded-md border border-border p-3">
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
                   <span className="text-sm font-semibold leading-tight">{i.title}</span>
@@ -117,7 +144,7 @@ function SiteDashboard() {
                 </div>
               </div>
             ))}
-            {issues.filter(i => i.status !== "resolved").length === 0 && (
+            {issues.filter((i: any) => i.status !== "resolved").length === 0 && (
               <div className="flex items-center gap-2 rounded-md border border-success/30 bg-success/5 p-3 text-sm text-success">
                 <CheckCircle2 className="h-4 w-4" /> No open issues. Clean site.
               </div>

@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SiteRouteImport } from './routes/site'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
@@ -18,7 +20,6 @@ import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminProcurementRouteImport } from './routes/admin.procurement'
-import { Route as AdminProjectsRouteImport } from './routes/admin.projects'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminWorkforceRouteImport } from './routes/admin.workforce'
 import { Route as SiteIndexRouteImport } from './routes/site.index'
@@ -31,6 +32,8 @@ import { Route as SiteIssuesRouteImport } from './routes/site.issues'
 import { Route as SiteMaterialsRouteImport } from './routes/site.materials'
 import { Route as SiteProjectsRouteImport } from './routes/site.projects'
 import { Route as SiteWorkforceRouteImport } from './routes/site.workforce'
+import { Route as AdminProjectsIndexRouteImport } from './routes/admin.projects.index'
+import { Route as AdminProjectsProjectIdRouteImport } from './routes/admin.projects.$projectId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +43,16 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SiteRoute = SiteRouteImport.update({
@@ -75,11 +88,6 @@ const AdminInventoryRoute = AdminInventoryRouteImport.update({
 const AdminProcurementRoute = AdminProcurementRouteImport.update({
   id: '/procurement',
   path: '/procurement',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminProjectsRoute = AdminProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminReportsRoute = AdminReportsRouteImport.update({
@@ -142,17 +150,28 @@ const SiteWorkforceRoute = SiteWorkforceRouteImport.update({
   path: '/workforce',
   getParentRoute: () => SiteRoute,
 } as any)
+const AdminProjectsIndexRoute = AdminProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProjectsProjectIdRoute = AdminProjectsProjectIdRouteImport.update({
+  id: '/projects/$projectId',
+  path: '/projects/$projectId',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/settings': typeof SettingsRoute
+  '/signup': typeof SignupRoute
   '/site': typeof SiteRouteWithChildren
   '/admin/audit': typeof AdminAuditRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/procurement': typeof AdminProcurementRoute
-  '/admin/projects': typeof AdminProjectsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/workforce': typeof AdminWorkforceRoute
   '/site/dashboard': typeof SiteDashboardRoute
@@ -166,15 +185,18 @@ export interface FileRoutesByFullPath {
   '/site/workforce': typeof SiteWorkforceRoute
   '/admin/': typeof AdminIndexRoute
   '/site/': typeof SiteIndexRoute
+  '/admin/projects/$projectId': typeof AdminProjectsProjectIdRoute
+  '/admin/projects/': typeof AdminProjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/settings': typeof SettingsRoute
+  '/signup': typeof SignupRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/procurement': typeof AdminProcurementRoute
-  '/admin/projects': typeof AdminProjectsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/workforce': typeof AdminWorkforceRoute
   '/site/dashboard': typeof SiteDashboardRoute
@@ -188,18 +210,21 @@ export interface FileRoutesByTo {
   '/site/workforce': typeof SiteWorkforceRoute
   '/admin': typeof AdminIndexRoute
   '/site': typeof SiteIndexRoute
+  '/admin/projects/$projectId': typeof AdminProjectsProjectIdRoute
+  '/admin/projects': typeof AdminProjectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/settings': typeof SettingsRoute
+  '/signup': typeof SignupRoute
   '/site': typeof SiteRouteWithChildren
   '/admin/audit': typeof AdminAuditRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/procurement': typeof AdminProcurementRoute
-  '/admin/projects': typeof AdminProjectsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/workforce': typeof AdminWorkforceRoute
   '/site/dashboard': typeof SiteDashboardRoute
@@ -213,19 +238,22 @@ export interface FileRoutesById {
   '/site/workforce': typeof SiteWorkforceRoute
   '/admin/': typeof AdminIndexRoute
   '/site/': typeof SiteIndexRoute
+  '/admin/projects/$projectId': typeof AdminProjectsProjectIdRoute
+  '/admin/projects/': typeof AdminProjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/admin'
+    | '/settings'
+    | '/signup'
     | '/site'
     | '/admin/audit'
     | '/admin/dashboard'
     | '/admin/finance'
     | '/admin/inventory'
     | '/admin/procurement'
-    | '/admin/projects'
     | '/admin/reports'
     | '/admin/workforce'
     | '/site/dashboard'
@@ -239,15 +267,18 @@ export interface FileRouteTypes {
     | '/site/workforce'
     | '/admin/'
     | '/site/'
+    | '/admin/projects/$projectId'
+    | '/admin/projects/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/settings'
+    | '/signup'
     | '/admin/audit'
     | '/admin/dashboard'
     | '/admin/finance'
     | '/admin/inventory'
     | '/admin/procurement'
-    | '/admin/projects'
     | '/admin/reports'
     | '/admin/workforce'
     | '/site/dashboard'
@@ -261,17 +292,20 @@ export interface FileRouteTypes {
     | '/site/workforce'
     | '/admin'
     | '/site'
+    | '/admin/projects/$projectId'
+    | '/admin/projects'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/settings'
+    | '/signup'
     | '/site'
     | '/admin/audit'
     | '/admin/dashboard'
     | '/admin/finance'
     | '/admin/inventory'
     | '/admin/procurement'
-    | '/admin/projects'
     | '/admin/reports'
     | '/admin/workforce'
     | '/site/dashboard'
@@ -285,11 +319,15 @@ export interface FileRouteTypes {
     | '/site/workforce'
     | '/admin/'
     | '/site/'
+    | '/admin/projects/$projectId'
+    | '/admin/projects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  SettingsRoute: typeof SettingsRoute
+  SignupRoute: typeof SignupRoute
   SiteRoute: typeof SiteRouteWithChildren
 }
 
@@ -307,6 +345,20 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/site': {
@@ -356,13 +408,6 @@ declare module '@tanstack/react-router' {
       path: '/procurement'
       fullPath: '/admin/procurement'
       preLoaderRoute: typeof AdminProcurementRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/projects': {
-      id: '/admin/projects'
-      path: '/projects'
-      fullPath: '/admin/projects'
-      preLoaderRoute: typeof AdminProjectsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/reports': {
@@ -449,6 +494,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteWorkforceRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/admin/projects/': {
+      id: '/admin/projects/'
+      path: '/projects'
+      fullPath: '/admin/projects/'
+      preLoaderRoute: typeof AdminProjectsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/projects/$projectId': {
+      id: '/admin/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/admin/projects/$projectId'
+      preLoaderRoute: typeof AdminProjectsProjectIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
@@ -458,10 +517,11 @@ interface AdminRouteChildren {
   AdminFinanceRoute: typeof AdminFinanceRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminProcurementRoute: typeof AdminProcurementRoute
-  AdminProjectsRoute: typeof AdminProjectsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminWorkforceRoute: typeof AdminWorkforceRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminProjectsProjectIdRoute: typeof AdminProjectsProjectIdRoute
+  AdminProjectsIndexRoute: typeof AdminProjectsIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -470,10 +530,11 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminFinanceRoute: AdminFinanceRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminProcurementRoute: AdminProcurementRoute,
-  AdminProjectsRoute: AdminProjectsRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminWorkforceRoute: AdminWorkforceRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminProjectsProjectIdRoute: AdminProjectsProjectIdRoute,
+  AdminProjectsIndexRoute: AdminProjectsIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -509,6 +570,8 @@ const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  SettingsRoute: SettingsRoute,
+  SignupRoute: SignupRoute,
   SiteRoute: SiteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
