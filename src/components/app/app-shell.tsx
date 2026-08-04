@@ -450,6 +450,24 @@ function BottomNav({ items, currentPath }: { items: NavItem[]; currentPath: stri
   );
 }
 
+function GlobalLoading() {
+  const isPending = useRouterState({ select: (s) => s.status === "pending" });
+  if (!isPending) return null;
+  return (
+    <>
+      <style>{`
+        @keyframes indeterminate {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(300%); }
+        }
+      `}</style>
+      <div className="fixed top-0 left-0 right-0 z-[100] h-1 bg-primary/20 overflow-hidden">
+        <div className="h-full w-1/3 bg-primary" style={{ animation: 'indeterminate 1s infinite linear' }} />
+      </div>
+    </>
+  );
+}
+
 export function AppShell({ children, title }: { children: ReactNode; title: string }) {
   const { role } = useRole();
   const items = role === "admin" ? ADMIN_NAV : SITE_NAV;
@@ -458,6 +476,7 @@ export function AppShell({ children, title }: { children: ReactNode; title: stri
 
   return (
     <div className="flex min-h-screen bg-background">
+      <GlobalLoading />
       <aside className="sticky top-0 hidden h-screen w-[104px] shrink-0 lg:block py-6 pl-0">
         <div className="h-full w-full rounded-r-[3rem] overflow-hidden shadow-2xl">
            <SidebarContent items={items} currentPath={currentPath} />
