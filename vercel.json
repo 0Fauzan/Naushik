@@ -1,12 +1,8 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build && cp -r dist/client/* public/",
   "installCommand": "npm install",
   "framework": null,
   "rewrites": [
-    {
-      "source": "/assets/(.*)",
-      "destination": "/dist/client/assets/$1"
-    },
     {
       "source": "/(.*)",
       "destination": "/api/index"
