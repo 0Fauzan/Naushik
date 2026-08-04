@@ -3,7 +3,8 @@ import postgres from "postgres";
 import * as schema from "./schema";
 import "dotenv/config";
 
-const connectionString = process.env.DATABASE_URL;
+// HARDCODED to bypass Vercel dashboard Environment Variable overrides which were causing connection failures
+const connectionString = "postgresql://postgres.jzdnkdhrqcajnplulnma:Naushik%40123@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres";
 
 if (!connectionString) {
   throw new Error("DATABASE_URL is missing in environment variables.");
