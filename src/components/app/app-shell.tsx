@@ -452,7 +452,16 @@ function BottomNav({ items, currentPath }: { items: NavItem[]; currentPath: stri
 
 function GlobalLoading() {
   const isPending = useRouterState({ select: (s) => s.status === "pending" });
-  if (!isPending) return null;
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (!isPending) { setShow(false); return; }
+    // Only show bar if navigation takes > 200ms (cache misses / slow fetches)
+    const t = setTimeout(() => setShow(true), 200);
+    return () => clearTimeout(t);
+  }, [isPending]);
+
+  if (!show) return null;
   return (
     <>
       <style>{`

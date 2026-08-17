@@ -128,12 +128,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
 
-  // Global polling mechanism for real-time data synchronization
+  // Soft background sync every 60s — avoids triggering loading states on tab switch
   useEffect(() => {
     const interval = setInterval(() => {
-      // Invalidate the router every 4 seconds to refetch active loaders
       router.invalidate();
-    }, 4000);
+    }, 60_000);
     return () => clearInterval(interval);
   }, [router]);
 

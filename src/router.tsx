@@ -6,7 +6,7 @@ export const getRouter = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 5000, // Data stays fresh for 5s to prevent instant refetching
+        staleTime: 30_000, // Data stays fresh for 30s — prevents re-fetch on tab switch
       },
     },
   });
@@ -16,8 +16,8 @@ export const getRouter = () => {
     context: { queryClient },
     scrollRestoration: true,
     defaultPreload: "intent",
-    defaultPreloadStaleTime: 10000,
-    defaultStaleTime: 5000,
+    defaultPreloadStaleTime: 30_000, // Preloaded data stays fresh for 30s
+    defaultStaleTime: 30_000,        // Loader data treated as fresh for 30s
   });
 
   return router;
