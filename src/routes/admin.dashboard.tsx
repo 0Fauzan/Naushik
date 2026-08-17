@@ -25,7 +25,7 @@ import { getNotes, createNote, updateNote, deleteNote } from "@/server/notes";
 import { getMetrics } from "@/server/metrics";
 import { getAuditLogs } from "@/server/audit";
 import { getMaterialRequests, createMaterialRequest } from "@/server/procurement";
-import { updateMeetingStatus } from "@/server/meetings";
+import { getMeetings, updateMeetingStatus } from "@/server/meetings";
 import { cn } from "@/lib/utils";
 
 import { toast } from "sonner";
@@ -33,14 +33,15 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/admin/dashboard")({
   head: () => ({ meta: [{ title: "Admin Dashboard · Naushik" }] }),
   loader: async () => {
-    const [projects, notes, metrics, auditLogs, materialRequests] = await Promise.all([
+    const [projects, notes, metrics, auditLogs, materialRequests, meetings] = await Promise.all([
       getProjects(),
       getNotes(),
       getMetrics(),
       getAuditLogs(),
       getMaterialRequests(),
+      getMeetings(),
     ]);
-    return { projects, notes, metrics, auditLogs, materialRequests };
+    return { projects, notes, metrics, auditLogs, materialRequests, meetings };
   },
   component: AdminDashboard,
 });
@@ -53,9 +54,15 @@ function AdminDashboard() {
   const notes = Array.isArray(loaderData.notes) ? loaderData.notes : [];
   const auditLogs = Array.isArray(loaderData.auditLogs) ? loaderData.auditLogs : [];
   const materialRequests = Array.isArray(loaderData.materialRequests) ? loaderData.materialRequests : [];
+  const meetings = Array.isArray(loaderData.meetings) ? loaderData.meetings : [];
+  const nextMeeting = meetings.find((m: any) => m.status === "pending");
   const active = projects.filter((p: any) => p.status === "active").length;
   const delayed = projects.filter((p: any) => p.status === "delayed").length;
   const pending = materialRequests.filter((m: any) => m.status === "pending").length;
+  const totalBudget = projects.reduce((acc: number, p: any) => acc + (p.budget || 0), 0);
+  const totalSpent = projects.reduce((acc: number, p: any) => acc + (p.spent || 0), 0);
+  const budgetUtilized = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
+  const avgProgress = projects.length > 0 ? Math.round(projects.reduce((acc: number, p: any) => acc + (p.progress || 0), 0) / projects.length) : 0;
   const firstName = user.name;
 
   const [noteOpen, setNoteOpen] = useState(false);
@@ -93,9 +100,10 @@ function AdminDashboard() {
   };
 
   const handleMeetingStatus = async (status: string, toastMessage: string) => {
+    if (!nextMeeting) return;
     setIsUpdatingMeeting(true);
     try {
-      await updateMeetingStatus({ data: { id: 1, status } }); // Dummy meeting ID for now
+      await updateMeetingStatus({ data: { id: nextMeeting.id, status } });
       toast.success(toastMessage);
       if (status === "rescheduled") setIsRescheduleOpen(false);
       router.invalidate();
@@ -364,9 +372,9 @@ function AdminDashboard() {
                  <div>
                     <div className="flex justify-between text-sm mb-2">
                        <span className="font-semibold">Budget Utilised</span>
-                       <span className="font-bold">0%</span>
+                       <span className="font-bold">{budgetUtilized}%</span>
                     </div>
-                    <Progress value={0} className="h-2 bg-accent" />
+                    <Progress value={budgetUtilized} className="h-2 bg-accent" />
                  </div>
                  <div>
                     <div className="flex justify-between text-sm mb-2">
@@ -426,9 +434,9 @@ function AdminDashboard() {
                   <div className="relative inline-flex items-center justify-center mb-2">
                      <svg className="w-16 h-16 transform -rotate-90">
                         <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-accent" />
-                        <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="6" fill="transparent" strokeDasharray="175" strokeDashoffset="175" className="text-success" strokeLinecap="round" />
+                        <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="6" fill="transparent" strokeDasharray="175" strokeDashoffset={175 - (175 * avgProgress) / 100} className="text-success" strokeLinecap="round" />
                      </svg>
-                     <span className="absolute text-xs font-bold">0%</span>
+                     <span className="absolute text-xs font-bold">{avgProgress}%</span>
                   </div>
                   <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Overall</div>
                   <div className="text-sm font-bold">Efficiency</div>
@@ -437,64 +445,73 @@ function AdminDashboard() {
                   <div className="relative inline-flex items-center justify-center mb-2">
                      <svg className="w-16 h-16 transform -rotate-90">
                         <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-accent" />
-                        <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="6" fill="transparent" strokeDasharray="175" strokeDashoffset="175" className="text-gold" strokeLinecap="round" />
+                        <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="6" fill="transparent" strokeDasharray="175" strokeDashoffset={175 - (175 * budgetUtilized) / 100} className="text-gold" strokeLinecap="round" />
                      </svg>
-                     <span className="absolute text-xs font-bold">0%</span>
+                     <span className="absolute text-xs font-bold">{budgetUtilized}%</span>
                   </div>
                   <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Budget</div>
                   <div className="text-sm font-bold">Utilised</div>
                </div>
             </Card>
 
-            <Card className="p-5 flex flex-col justify-between">
-               <div>
-                  <div className="flex justify-between items-start mb-1">
-                     <h3 className="font-bold">Board meeting</h3>
-                  <Dialog open={isMeetingOpen} onOpenChange={setIsMeetingOpen}>
-                     <DialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6"><ChevronRight className="h-4 w-4" /></Button>
-                     </DialogTrigger>
-                     <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                           <DialogTitle>Meeting Details</DialogTitle>
-                           <DialogDescription>March 26 at 4:00 PM</DialogDescription>
-                        </DialogHeader>
-                        <div className="py-4 text-sm space-y-2">
-                           <p><strong>Location:</strong> 4th floor, room 15B</p>
-                           <p><strong>Agenda:</strong> Quarterly portfolio review and budget allocations.</p>
-                        </div>
-                     </DialogContent>
-                  </Dialog>
-               </div>
-               <div className="text-xs text-primary font-medium flex items-center gap-1 mb-3">
-                  <span className="h-2 w-2 rounded-full bg-primary"></span> March 26 at 4:00 PM
-               </div>
-               <p className="text-xs text-muted-foreground leading-relaxed">
-                  Meeting with stakeholders, 4th floor, room 15B
-               </p>
-            </div>
-            <div className="flex gap-2 mt-4">
-               <Dialog open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
-                  <DialogTrigger asChild>
-                     <Button variant="outline" size="sm" className="flex-1 rounded-xl text-xs h-8">Reschedule</Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                     <DialogHeader>
-                        <DialogTitle>Reschedule Meeting</DialogTitle>
-                        <DialogDescription>Propose a new time for the board meeting.</DialogDescription>
-                     </DialogHeader>
-                     <div className="py-4 space-y-2">
-                        <Label>New Date & Time</Label>
-                        <Input type="datetime-local" />
+            {nextMeeting ? (
+               <Card className="p-5 flex flex-col justify-between">
+                  <div>
+                     <div className="flex justify-between items-start mb-1">
+                        <h3 className="font-bold">{nextMeeting.title}</h3>
+                        <Dialog open={isMeetingOpen} onOpenChange={setIsMeetingOpen}>
+                           <DialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-6 w-6"><ChevronRight className="h-4 w-4" /></Button>
+                           </DialogTrigger>
+                           <DialogContent className="sm:max-w-[425px]">
+                              <DialogHeader>
+                                 <DialogTitle>Meeting Details</DialogTitle>
+                                 <DialogDescription>{new Date(nextMeeting.date).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</DialogDescription>
+                              </DialogHeader>
+                              <div className="py-4 text-sm space-y-2">
+                                 <p><strong>Attendees:</strong> {nextMeeting.attendees || "Not specified"}</p>
+                              </div>
+                           </DialogContent>
+                        </Dialog>
                      </div>
-                     <DialogFooter>
-                        <Button disabled={isUpdatingMeeting} onClick={() => handleMeetingStatus("rescheduled", "Reschedule request sent")}>{isUpdatingMeeting ? "Sending..." : "Send Request"}</Button>
-                     </DialogFooter>
-                  </DialogContent>
-               </Dialog>
-                  <Button disabled={isUpdatingMeeting} onClick={() => handleMeetingStatus("accepted", "Invite accepted")} size="sm" className="flex-1 rounded-xl text-xs h-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-glass">Accept invite</Button>
-               </div>
-            </Card>
+                     <div className="text-xs text-primary font-medium flex items-center gap-1 mb-3">
+                        <span className="h-2 w-2 rounded-full bg-primary"></span> {new Date(nextMeeting.date).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                     </div>
+                     <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                        {nextMeeting.attendees ? `Meeting with ${nextMeeting.attendees}` : "No attendees specified"}
+                     </p>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                     <Dialog open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
+                        <DialogTrigger asChild>
+                           <Button variant="outline" size="sm" className="flex-1 rounded-xl text-xs h-8">Reschedule</Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                           <DialogHeader>
+                              <DialogTitle>Reschedule Meeting</DialogTitle>
+                              <DialogDescription>Propose a new time for {nextMeeting.title}.</DialogDescription>
+                           </DialogHeader>
+                           <div className="py-4 space-y-2">
+                              <Label>New Date & Time</Label>
+                              <Input type="datetime-local" />
+                           </div>
+                           <DialogFooter>
+                              <Button disabled={isUpdatingMeeting} onClick={() => handleMeetingStatus("rescheduled", "Reschedule request sent")}>{isUpdatingMeeting ? "Sending..." : "Send Request"}</Button>
+                           </DialogFooter>
+                        </DialogContent>
+                     </Dialog>
+                     <Button disabled={isUpdatingMeeting} onClick={() => handleMeetingStatus("accepted", "Invite accepted")} size="sm" className="flex-1 rounded-xl text-xs h-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-glass">Accept invite</Button>
+                  </div>
+               </Card>
+            ) : (
+               <Card className="p-5 flex flex-col justify-center items-center text-center">
+                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                     <CalendarDays className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <h3 className="font-bold text-sm">No upcoming meetings</h3>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">You have a clear schedule for now.</p>
+               </Card>
+            )}
          </div>
       </div>
     </AppShell>
