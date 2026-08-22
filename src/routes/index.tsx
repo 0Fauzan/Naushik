@@ -140,45 +140,31 @@ function LoginPage() {
               />
             </div>
 
-            {/* Password or PIN Input with Embedded Button */}
+            {/* Password or PIN Input */}
             {loginMethod === "password" ? (
-              <div className="relative flex items-center bg-background/80 backdrop-blur-sm border border-border/50 focus-within:border-brand/50 focus-within:ring-1 focus-within:ring-brand/50 rounded-2xl transition-all shadow-sm p-1">
-                <span className="text-xs font-medium text-muted-foreground pl-3 pr-2 select-none">Password:</span>
+              <div className="relative flex items-center bg-background/80 backdrop-blur-sm border border-border/50 focus-within:border-brand/50 focus-within:ring-1 focus-within:ring-brand/50 rounded-2xl transition-all shadow-sm">
+                <span className="text-xs font-medium text-muted-foreground pl-4 pr-2 select-none">Password:</span>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="flex-1 bg-transparent py-3 pr-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
+                  className="flex-1 bg-transparent py-4 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
                   required
                 />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="h-10 w-10 shrink-0 rounded-full bg-brand hover:bg-brand/90 text-primary-foreground flex items-center justify-center shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-                >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />}
-                </button>
               </div>
             ) : (
-              <div className="relative flex items-center bg-background/80 backdrop-blur-sm border border-border/50 focus-within:border-brand/50 focus-within:ring-1 focus-within:ring-brand/50 rounded-2xl transition-all shadow-sm p-1">
-                <span className="text-xs font-medium text-muted-foreground pl-3 pr-2 select-none">Enter PIN:</span>
+              <div className="relative flex items-center bg-background/80 backdrop-blur-sm border border-border/50 focus-within:border-brand/50 focus-within:ring-1 focus-within:ring-brand/50 rounded-2xl transition-all shadow-sm">
+                <span className="text-xs font-medium text-muted-foreground pl-4 pr-2 select-none">Enter PIN:</span>
                 <input
                   type="password"
                   maxLength={4}
                   value={pin}
                   onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                   placeholder="••••"
-                  className="flex-1 bg-transparent py-3 pr-2 text-xl tracking-[0.5em] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
+                  className="flex-1 bg-transparent py-4 pr-4 text-xl tracking-[0.5em] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
                   required
                 />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="h-10 w-10 shrink-0 rounded-full bg-brand hover:bg-brand/90 text-primary-foreground flex items-center justify-center shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-                >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />}
-                </button>
               </div>
             )}
 
@@ -194,6 +180,22 @@ function LoginPage() {
                 Forgot Password?
               </a>
             </div>
+
+            {/* Login Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full mt-3 h-12 rounded-2xl bg-brand hover:bg-brand/90 text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group active:scale-[0.99]"
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <span>Sign in</span>
+                  <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                </>
+              )}
+            </button>
 
             <div className="mt-8 flex items-center justify-center gap-4 py-2">
               <div className="h-[1px] flex-1 bg-border/60" />
