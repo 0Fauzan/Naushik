@@ -67,7 +67,7 @@ const MOBILE_NAV: Record<Role, NavItem[]> = {
 
 function BrandIcon() {
   return (
-    <div className="flex h-12 w-12 shrink-0 items-center justify-center p-1">
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center p-1">
       <img src="/naushik-icon.png" alt="Naushik" className="h-full w-full object-contain dark:brightness-125" />
     </div>
   );
@@ -295,7 +295,7 @@ function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string;
       <div className="flex items-center gap-3 sm:gap-6 lg:gap-10">
         {/* Complete Brand Logo (Blended directly on mobile and tablet) */}
         <Link to={role === "admin" ? "/admin/dashboard" : "/site/dashboard"} className="flex items-center lg:hidden transition-transform hover:opacity-90 active:scale-95">
-          <img src="/naushik-logo.png" alt="Naushik" className="h-8 w-auto object-contain dark:brightness-125" />
+          <img src="/naushik-logo.png" alt="Naushik" className="h-6 w-auto object-contain dark:brightness-125" />
         </Link>
 
         <div className="hidden items-center gap-2 md:flex">

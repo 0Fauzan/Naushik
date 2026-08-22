@@ -83,7 +83,7 @@ function LoginPage() {
           {/* Complete Logo (Blended) */}
           <div className="flex flex-col items-center mb-8">
             <div className="mb-6 flex items-center justify-center">
-              <img src="/naushik-logo.png" alt="Naushik" className="h-12 w-auto object-contain dark:brightness-125" />
+              <img src="/naushik-logo.png" alt="Naushik" className="h-8 w-auto object-contain dark:brightness-125" />
             </div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h1>
             <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
