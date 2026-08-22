@@ -292,28 +292,14 @@ function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string;
   return (
     <header className="sticky top-0 z-40 flex h-20 items-center justify-between px-4 sm:px-6 lg:px-10">
       <div className="flex items-center gap-3 sm:gap-6 lg:gap-10">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="lg:hidden h-10 w-10 rounded-full" aria-label="Open menu">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-[100px] border-r-0 p-0 bg-transparent shadow-none">
-            <SheetTitle className="sr-only">Navigation</SheetTitle>
-            <div className="h-full w-full rounded-r-[2.5rem] overflow-hidden shadow-2xl">
-               <SidebarContent items={items} currentPath={currentPath} />
-            </div>
-          </SheetContent>
-        </Sheet>
-
-        {/* Mobile & Tablet Logo & Name */}
+        {/* Brand Logo & Name (Visible on mobile and tablet) */}
         <Link to={role === "admin" ? "/admin/dashboard" : "/site/dashboard"} className="flex items-center gap-2.5 lg:hidden">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sidebar text-sidebar-foreground font-black text-base shadow-sm">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-sidebar text-sidebar-foreground font-black text-lg shadow-sm">
             N
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-bold tracking-tight text-foreground leading-none">Naushik</span>
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium mt-0.5">Cloud</span>
+            <span className="text-base font-bold tracking-tight text-foreground leading-none">Naushik</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mt-0.5">Cloud</span>
           </div>
         </Link>
 
@@ -331,7 +317,7 @@ function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string;
         <Input placeholder="Search or type command" className="h-11 w-full rounded-full pl-11 bg-background border-border/50 shadow-sm focus-visible:ring-primary/20" />
       </div>
 
-      <div className="flex items-center gap-3 lg:gap-4">
+      <div className="flex items-center gap-2.5 sm:gap-3 lg:gap-4">
         <div className="hidden lg:flex items-center rounded-full bg-primary/10 p-1">
            <button onClick={() => dark && toggleTheme()} className={cn("flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all", !dark ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
               Light
@@ -345,8 +331,6 @@ function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string;
           <PopoverTrigger asChild>
             <Button variant="outline" size="icon" className="h-10 w-10 rounded-full border-border/50 bg-background shadow-sm hover:bg-accent relative">
               <Bell className="h-4 w-4" />
-              {/* Commenting out badge since we are flushing notifications */}
-              {/* <span className="absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full bg-gold" /> */}
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-80">
@@ -358,11 +342,75 @@ function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string;
           </PopoverContent>
         </Popover>
 
-        <Link to="/settings" className="hidden sm:inline-flex">
-          <Button variant="outline" size="icon" className="h-10 w-10 rounded-full border-border/50 bg-background shadow-sm hover:bg-accent">
-            <Settings className="h-4 w-4" />
-          </Button>
-        </Link>
+        {/* Profile Dropdown (Includes settings, theme toggle, and logout) */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary p-0.5">
+              <Avatar className="h-10 w-10 border-2 border-primary/20 hover:border-primary/40 transition-colors shadow-sm cursor-pointer">
+                <AvatarFallback className="bg-gold text-gold-foreground text-xs font-bold">
+                  {user.name.split(" ").map(s => s[0]).slice(0, 2).join("")}
+                </AvatarFallback>
+              </Avatar>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-60 p-2 rounded-2xl shadow-xl bg-popover/95 backdrop-blur-xl border border-border/60">
+            <DropdownMenuLabel className="p-2 font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-semibold leading-none text-foreground">{user.name}</p>
+                <p className="text-xs leading-none text-muted-foreground truncate">{user.email}</p>
+                <div className="pt-1.5 flex items-center gap-2">
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary capitalize">
+                    {role === "admin" ? "Admin" : "Site Manager"}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[10px] text-green-500 font-medium">
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" /> Live
+                  </span>
+                </div>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="my-1" />
+            
+            <DropdownMenuItem asChild>
+              <Link to="/settings" className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium cursor-pointer hover:bg-accent">
+                <Settings className="h-4 w-4 text-muted-foreground" />
+                <span>Account Settings</span>
+              </Link>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem 
+              onClick={toggleTheme}
+              className="flex items-center justify-between p-2 rounded-xl text-xs font-medium cursor-pointer hover:bg-accent"
+            >
+              <div className="flex items-center gap-2.5">
+                {dark ? <Moon className="h-4 w-4 text-muted-foreground" /> : <Sun className="h-4 w-4 text-muted-foreground" />}
+                <span>{dark ? "Dark mode" : "Light mode"}</span>
+              </div>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-bold">
+                {dark ? "ON" : "OFF"}
+              </span>
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator className="my-1" />
+
+            <DropdownMenuItem
+              onClick={async () => {
+                try {
+                  const { logout } = await import("@/server/auth");
+                  const { clearClientMe } = await import("@/lib/auth-client");
+                  clearClientMe();
+                  await logout();
+                  window.location.href = "/";
+                } catch (e) {
+                  window.location.href = "/";
+                }
+              }}
+              className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium text-destructive focus:text-destructive cursor-pointer hover:bg-destructive/10"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Dialog open={isExportOpen} onOpenChange={setIsExportOpen}>
           <DialogTrigger asChild>
