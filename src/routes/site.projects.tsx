@@ -46,13 +46,15 @@ function SiteProjects() {
           </div>
 
           <Tabs defaultValue="overview" className="border-t border-border">
-            <TabsList className="ml-4 mt-3">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="timeline">Timeline</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
-              <TabsTrigger value="photos">Photos</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
-            </TabsList>
+            <div className="overflow-x-auto no-scrollbar px-2 pt-2">
+              <TabsList className="flex w-max h-9 gap-0.5 bg-muted/60 p-1">
+                <TabsTrigger value="overview" className="text-xs px-3 h-7">Overview</TabsTrigger>
+                <TabsTrigger value="timeline" className="text-xs px-3 h-7">Timeline</TabsTrigger>
+                <TabsTrigger value="documents" className="text-xs px-3 h-7">Documents</TabsTrigger>
+                <TabsTrigger value="photos" className="text-xs px-3 h-7">Photos</TabsTrigger>
+                <TabsTrigger value="history" className="text-xs px-3 h-7">History</TabsTrigger>
+              </TabsList>
+            </div>
             
             <CardContent className="pt-4">
               <TabsContent value="overview" className="mt-0 space-y-4">
@@ -108,25 +110,27 @@ function SiteProjects() {
                 ))}
               </TabsContent>
 
-              <TabsContent value="documents" className="mt-0 space-y-2">
-                {[
-                  { name: "Structural GA Rev C.dwg", size: "14.2 MB", type: "Drawing", date: "2026-06-15" },
-                  { name: "L7 Concrete Inspection Report.pdf", size: "2.4 MB", type: "Inspection", date: "2026-06-18" },
-                  { name: "Pour Card L8 Slab.pdf", size: "1.1 MB", type: "Pour Card", date: "2026-06-20" },
-                  { name: "Approved BOQ Schedule.xlsx", size: "4.8 MB", type: "BOQ", date: "2026-05-10" },
-                ].map((doc) => (
-                  <div key={doc.name} className="flex items-center justify-between p-3 rounded-lg border border-border">
-                    <div className="flex items-center gap-3">
-                      <FileText className="h-5 w-5 text-primary" />
-                      <div>
-                        <div className="font-medium text-sm">{doc.name}</div>
-                        <div className="text-xs text-muted-foreground">{doc.type} · {doc.size} · {doc.date}</div>
+                <TabsContent value="documents" className="mt-0 space-y-2">
+                  {[
+                    { name: "Structural GA Rev C.dwg", size: "14.2 MB", type: "Drawing", date: "2026-06-15" },
+                    { name: "L7 Concrete Inspection Report.pdf", size: "2.4 MB", type: "Inspection", date: "2026-06-18" },
+                    { name: "Pour Card L8 Slab.pdf", size: "1.1 MB", type: "Pour Card", date: "2026-06-20" },
+                    { name: "Approved BOQ Schedule.xlsx", size: "4.8 MB", type: "BOQ", date: "2026-05-10" },
+                  ].map((doc) => (
+                    <div key={doc.name} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg border border-border">
+                      <div className="flex items-start gap-3 min-w-0">
+                        <FileText className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                        <div className="min-w-0">
+                          <div className="font-medium text-sm truncate">{doc.name}</div>
+                          <div className="text-xs text-muted-foreground">{doc.type} · {doc.size} · {doc.date}</div>
+                        </div>
+                      </div>
+                      <div className="shrink-0 pl-8 sm:pl-0">
+                        <DocChip name="Download" />
                       </div>
                     </div>
-                    <DocChip name="Download" />
-                  </div>
-                ))}
-              </TabsContent>
+                  ))}
+                </TabsContent>
 
               <TabsContent value="photos" className="mt-0">
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

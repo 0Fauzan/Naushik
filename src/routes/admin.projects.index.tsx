@@ -221,24 +221,29 @@ function AdminProjects() {
       />
 
       <Card className="overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-          <Tabs value={filter} onValueChange={setFilter} className="min-w-0 max-w-full">
-            <TabsList className="flex w-full max-w-full overflow-x-auto sm:w-auto">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="active">Active</TabsTrigger>
-              <TabsTrigger value="delayed">Delayed</TabsTrigger>
-              <TabsTrigger value="on-hold">On Hold</TabsTrigger>
-              <TabsTrigger value="completed">Completed</TabsTrigger>
-            </TabsList>
-          </Tabs>
+        {/* Filter bar */}
+        <div className="flex flex-col gap-3 border-b border-border p-3 sm:p-4">
+          {/* Scrollable status tabs */}
+          <div className="overflow-x-auto no-scrollbar -mx-0">
+            <Tabs value={filter} onValueChange={setFilter} className="min-w-0">
+              <TabsList className="flex w-max h-9 gap-0.5 bg-muted/60 p-1">
+                <TabsTrigger value="all" className="text-xs px-2.5 h-7">All</TabsTrigger>
+                <TabsTrigger value="active" className="text-xs px-2.5 h-7">Active</TabsTrigger>
+                <TabsTrigger value="delayed" className="text-xs px-2.5 h-7">Delayed</TabsTrigger>
+                <TabsTrigger value="on-hold" className="text-xs px-2.5 h-7">On Hold</TabsTrigger>
+                <TabsTrigger value="completed" className="text-xs px-2.5 h-7">Completed</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+          {/* Search + filter inline */}
           <div className="flex gap-2">
-            <div className="relative">
+            <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search projects…" className="h-9 w-full pl-8 sm:w-64" />
+              <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search projects…" className="h-9 w-full pl-8" />
             </div>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="shrink-0"><Filter className="h-3.5 w-3.5" /></Button>
+                <Button variant="outline" size="sm" className="shrink-0 h-9 w-9 p-0"><Filter className="h-3.5 w-3.5" /></Button>
               </PopoverTrigger>
               <PopoverContent align="end" className="w-56">
                 <div className="space-y-4">
