@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Building2, HardHat, ArrowRight, Loader2 } from "lucide-react";
+import { Building2, HardHat, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { login, loginWithPin } from "@/server/auth";
 
@@ -21,6 +21,7 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pin, setPin] = useState("");
+  const [showSecret, setShowSecret] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -145,26 +146,42 @@ function LoginPage() {
               <div className="relative flex items-center bg-background/80 backdrop-blur-sm border border-border/50 focus-within:border-brand/50 focus-within:ring-1 focus-within:ring-brand/50 rounded-2xl transition-all shadow-sm">
                 <span className="text-xs font-medium text-muted-foreground pl-4 pr-2 select-none">Password:</span>
                 <input
-                  type="password"
+                  type={showSecret ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="flex-1 bg-transparent py-4 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
+                  className="flex-1 bg-transparent py-4 pr-11 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowSecret(!showSecret)}
+                  className="absolute right-3 p-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
+                  aria-label={showSecret ? "Hide password" : "Show password"}
+                >
+                  {showSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             ) : (
               <div className="relative flex items-center bg-background/80 backdrop-blur-sm border border-border/50 focus-within:border-brand/50 focus-within:ring-1 focus-within:ring-brand/50 rounded-2xl transition-all shadow-sm">
                 <span className="text-xs font-medium text-muted-foreground pl-4 pr-2 select-none">Enter PIN:</span>
                 <input
-                  type="password"
+                  type={showSecret ? "text" : "password"}
                   maxLength={4}
                   value={pin}
                   onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                   placeholder="••••"
-                  className="flex-1 bg-transparent py-4 pr-4 text-xl tracking-[0.5em] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
+                  className="flex-1 bg-transparent py-4 pr-11 text-xl tracking-[0.5em] font-mono text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowSecret(!showSecret)}
+                  className="absolute right-3 p-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted/50"
+                  aria-label={showSecret ? "Hide PIN" : "Show PIN"}
+                >
+                  {showSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             )}
 
