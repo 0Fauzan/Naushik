@@ -76,10 +76,10 @@ function SignupPage() {
         {/* Glassmorphic Card */}
         <div className="bg-card/70 backdrop-blur-xl border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.5)] rounded-[32px] p-8 sm:p-10">
           
-          {/* Complete Logo */}
+          {/* Complete Logo (Blended) */}
           <div className="flex flex-col items-center mb-8">
-            <div className="p-3.5 bg-white/95 rounded-2xl shadow-sm border border-border/40 mb-6 flex items-center justify-center">
-              <img src="/naushik-logo.png" alt="Naushik" className="h-10 w-auto object-contain" />
+            <div className="mb-6 flex items-center justify-center">
+              <img src="/naushik-logo.png" alt="Naushik" className="h-12 w-auto object-contain dark:brightness-125" />
             </div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Create workspace</h1>
             <p className="text-sm text-muted-foreground mt-1">Setup your account to get started</p>

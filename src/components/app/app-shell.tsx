@@ -67,8 +67,8 @@ const MOBILE_NAV: Record<Role, NavItem[]> = {
 
 function BrandIcon() {
   return (
-    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/95 p-1.5 shadow-md border border-white/20 dark:border-white/10">
-      <img src="/naushik-icon.png" alt="Naushik" className="h-full w-full object-contain" />
+    <div className="flex h-12 w-12 shrink-0 items-center justify-center p-1">
+      <img src="/naushik-icon.png" alt="Naushik" className="h-full w-full object-contain dark:brightness-125" />
     </div>
   );
 }
@@ -293,11 +293,9 @@ function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string;
   return (
     <header className="sticky top-0 z-40 flex h-20 items-center justify-between px-4 sm:px-6 lg:px-10">
       <div className="flex items-center gap-3 sm:gap-6 lg:gap-10">
-        {/* Complete Brand Logo (Visible on mobile and tablet) */}
-        <Link to={role === "admin" ? "/admin/dashboard" : "/site/dashboard"} className="flex items-center lg:hidden">
-          <div className="flex items-center px-2 py-1 bg-white/95 rounded-xl shadow-sm border border-border/40">
-            <img src="/naushik-logo.png" alt="Naushik" className="h-7 w-auto object-contain" />
-          </div>
+        {/* Complete Brand Logo (Blended directly on mobile and tablet) */}
+        <Link to={role === "admin" ? "/admin/dashboard" : "/site/dashboard"} className="flex items-center lg:hidden transition-transform hover:opacity-90 active:scale-95">
+          <img src="/naushik-logo.png" alt="Naushik" className="h-8 w-auto object-contain dark:brightness-125" />
         </Link>
 
         <div className="hidden items-center gap-2 md:flex">
