@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   FolderKanban, Building2, AlertOctagon, Users, ShoppingCart, Wallet, TrendingUp, ChevronRight, Plus, UserPlus,
-  CalendarDays, CloudLightning, ShieldCheck, Gift, Check, Clock, MoreVertical, Edit, Trash
+  CalendarDays, CloudLightning, ShieldCheck, Check, Clock, MoreVertical, Edit, Trash
 } from "lucide-react";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer,
@@ -74,7 +74,7 @@ function AdminDashboard() {
   const [requestItemName, setRequestItemName] = useState("");
   const [requestQty, setRequestQty] = useState("");
   const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
-  const [isPremiumOpen, setIsPremiumOpen] = useState(false);
+
   const [isMeetingOpen, setIsMeetingOpen] = useState(false);
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isUpdatingMeeting, setIsUpdatingMeeting] = useState(false);
@@ -394,38 +394,7 @@ function AdminDashboard() {
             </CardContent>
          </Card>
 
-         {/* Premium Banner */}
-         <Card className="xl:col-span-1 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white border-0 shadow-lg flex flex-col items-center justify-center text-center p-8 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/20 rounded-full blur-3xl -ml-10 -mb-10"></div>
-            
-            <div className="mb-6 relative">
-               <div className="h-20 w-20 bg-white/20 backdrop-blur-md text-white rounded-3xl rotate-12 flex items-center justify-center shadow-xl border border-white/20">
-                  <Gift className="h-10 w-10 -rotate-12 drop-shadow-md" />
-               </div>
-            </div>
-            <h3 className="text-2xl font-black mb-2 tracking-tight drop-shadow-sm">Go Premium!</h3>
-            <p className="text-sm text-white/90 mb-6 leading-relaxed font-medium">
-              Gain access to a range of exclusive benefits designed to enhance your user experience.
-            </p>
-            <Dialog open={isPremiumOpen} onOpenChange={setIsPremiumOpen}>
-              <DialogTrigger asChild>
-                <Button className="w-full rounded-full font-bold shadow-md bg-white text-purple-700 hover:bg-white/90 transition-all">
-                  Find out more
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Upgrade to Premium</DialogTitle>
-                  <DialogDescription>Unlock advanced features and priority support.</DialogDescription>
-                </DialogHeader>
-                <div className="py-6 text-center space-y-4">
-                  <Gift className="h-12 w-12 text-purple-500 mx-auto" />
-                  <p className="text-sm font-medium">Coming soon!</p>
-                </div>
-              </DialogContent>
-            </Dialog>
-         </Card>
+
 
          {/* Circular Stats & Board Meeting */}
          <div className="xl:col-span-1 flex flex-col gap-6">
