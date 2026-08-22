@@ -12,7 +12,8 @@ export const getIssues = createServerFn({ method: "GET" })
 
 export const getIssue = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
   const { db } = await import("../db");
   const { issues } = await import("../db/schema");
   const [issue] = await db.select().from(issues).where(eq(issues.id, id));
@@ -21,7 +22,8 @@ export const getIssue = createServerFn({ method: "GET" })
 
 export const createIssue = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: any }) => {
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { issues } = await import("../db/schema");
     const [issue] = await db.insert(issues).values({
@@ -48,7 +50,8 @@ export const createIssue = createServerFn({ method: "POST" })
 
 export const updateIssue = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: any }) => {
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { issues } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");
@@ -60,7 +63,8 @@ export const updateIssue = createServerFn({ method: "POST" })
 
 export const deleteIssue = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
     const { db } = await import("../db");
     const { issues } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");

@@ -258,7 +258,7 @@ function AdminDashboard() {
                         <div className="flex justify-between items-start mb-1">
                            <div className="font-semibold text-sm">{a.user}</div>
                            <div className="text-[10px] text-muted-foreground flex items-center gap-1">
-                              <Clock className="h-3 w-3" /> {a.date}
+                              <Clock className="h-3 w-3" /> {a.date ? new Date(a.date).toLocaleDateString() : ""}
                            </div>
                         </div>
                         <div className="text-xs text-muted-foreground line-clamp-2">

@@ -1,11 +1,14 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { RoleProvider } from "@/lib/role-context";
-import { getMe } from "@/server/auth";
+import { getClientMe } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/site")({
-  beforeLoad: async () => {
+  beforeLoad: async ({ context }) => {
+    if ((context as any)?.dbUser) {
+      return { dbUser: (context as any).dbUser };
+    }
     try {
-      const res = await getMe();
+      const res = await getClientMe();
       if (!res.success) throw new Error();
       return { dbUser: res.user };
     } catch (err) {

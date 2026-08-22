@@ -12,7 +12,8 @@ export const getMaterialRequests = createServerFn({ method: "GET" })
 
 export const createMaterialRequest = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: any }) => {
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { materialRequests } = await import("../db/schema");
     const [req] = await db.insert(materialRequests).values({
@@ -25,7 +26,8 @@ export const createMaterialRequest = createServerFn({ method: "POST" })
 
 export const updateMaterialRequestStatus = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: { id: number, status: string } }) => {
+  .validator((data: { id: number, status: string }) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { materialRequests } = await import("../db/schema");
     await db.update(materialRequests).set({ status: data.status }).where(eq(materialRequests.id, data.id));
@@ -33,7 +35,8 @@ export const updateMaterialRequestStatus = createServerFn({ method: "POST" })
 
 export const deleteMaterialRequest = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
     const { db } = await import("../db");
     const { materialRequests } = await import("../db/schema");
     await db.delete(materialRequests).where(eq(materialRequests.id, id));

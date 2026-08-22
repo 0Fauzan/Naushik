@@ -12,7 +12,8 @@ export const getSites = createServerFn({ method: "GET" })
 
 export const createSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: { name: string; location?: string } }) => {
+  .validator((data: { name: string; location?: string }) => data)
+  .handler(async ({ data }) => {
   const { db } = await import("../db");
   const { sites } = await import("../db/schema");
   const [newSite] = await db.insert(sites).values(data).returning();
@@ -21,7 +22,8 @@ export const createSite = createServerFn({ method: "POST" })
 
 export const updateSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: { id: number; name?: string; location?: string; status?: string } }) => {
+  .validator((data: { id: number; name?: string; location?: string; status?: string }) => data)
+  .handler(async ({ data }) => {
   const { db } = await import("../db");
   const { sites } = await import("../db/schema");
   const { id, ...updateData } = data;
@@ -31,7 +33,8 @@ export const updateSite = createServerFn({ method: "POST" })
 
 export const deleteSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
   const { db } = await import("../db");
   const { sites } = await import("../db/schema");
   await db.delete(sites).where(eq(sites.id, id));

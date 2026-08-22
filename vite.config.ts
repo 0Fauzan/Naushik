@@ -12,11 +12,7 @@ export default defineConfig({
       projects: ["./tsconfig.json"],
     }),
     tailwindcss(),
-    tanstackStart({
-      server: {
-        preset: "vercel"
-      }
-    }),
+    tanstackStart(),
     viteReact(),
   ],
   resolve: {

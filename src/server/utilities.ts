@@ -12,7 +12,8 @@ export const getUtilities = createServerFn({ method: "GET" })
 
 export const createUtility = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: { name: string; type?: string; siteId?: number; inUse?: boolean } }) => {
+  .validator((data: { name: string; type?: string; siteId?: number; inUse?: boolean }) => data)
+  .handler(async ({ data }) => {
   const { db } = await import("../db");
   const { utilities } = await import("../db/schema");
   const [newUtility] = await db.insert(utilities).values(data).returning();
@@ -21,7 +22,8 @@ export const createUtility = createServerFn({ method: "POST" })
 
 export const updateUtility = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: { id: number; name?: string; type?: string; siteId?: number; inUse?: boolean } }) => {
+  .validator((data: { id: number; name?: string; type?: string; siteId?: number; inUse?: boolean }) => data)
+  .handler(async ({ data }) => {
   const { db } = await import("../db");
   const { utilities } = await import("../db/schema");
   const { id, ...updateData } = data;
@@ -31,7 +33,8 @@ export const updateUtility = createServerFn({ method: "POST" })
 
 export const deleteUtility = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
   const { db } = await import("../db");
   const { utilities } = await import("../db/schema");
   await db.delete(utilities).where(eq(utilities.id, id));

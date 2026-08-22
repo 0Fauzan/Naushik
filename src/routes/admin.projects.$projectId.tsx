@@ -97,8 +97,8 @@ function ProjectDetails() {
               ) : (
                 <div className="space-y-4">
                   {/* Just showing a combined mock feed of the most recent 5 items */}
-                  {[...requests.map(r => ({ ...r, _type: 'request', _date: new Date(r.date) })), 
-                    ...projectIssues.map(i => ({ ...i, _type: 'issue', _date: new Date(i.date) }))]
+                  {[...requests.map(r => ({ ...r, _type: 'request' as const, _date: new Date(r.date) })), 
+                    ...projectIssues.map(i => ({ ...i, _type: 'issue' as const, _date: new Date(i.date) }))]
                     .sort((a, b) => b._date.getTime() - a._date.getTime())
                     .slice(0, 5)
                     .map((item, i) => (
@@ -108,7 +108,7 @@ function ProjectDetails() {
                         </div>
                         <div>
                           <div className="font-medium">
-                            {item._type === 'request' ? `Material Request: ${item.qty} ${item.unit} ${item.item}` : `Issue: ${item.title}`}
+                            {item._type === 'request' ? `Material Request: ${item.qty} ${item.unit || ''} ${item.item}` : `Issue: ${item.title}`}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             Status: <span className="font-medium">{item.status}</span> · {item._date.toLocaleDateString()}

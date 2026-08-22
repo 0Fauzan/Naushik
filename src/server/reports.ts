@@ -11,6 +11,7 @@ export const getReports = createServerFn({ method: "GET" })
 
 export const createReport = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
+  .validator((data: { title: string, source: string, frequency: string }) => data)
   .handler(async ({ data }: { data: { title: string, source: string, frequency: string } }) => {
     const { db } = await import("../db");
     const { reports } = await import("../db/schema");

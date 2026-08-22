@@ -12,6 +12,7 @@ export const getMeetings = createServerFn({ method: "GET" })
 
 export const updateMeetingStatus = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
+  .validator((data: { id: number, status: string }) => data)
   .handler(async ({ data }: { data: { id: number, status: string } }) => {
     const { db } = await import("../db");
     const { meetings } = await import("../db/schema");

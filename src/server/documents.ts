@@ -12,7 +12,8 @@ export const getDocuments = createServerFn({ method: "GET" })
 
 export const createDocument = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: any }) => {
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { documents } = await import("../db/schema");
     const [doc] = await db.insert(documents).values({
@@ -25,7 +26,8 @@ export const createDocument = createServerFn({ method: "POST" })
 
 export const deleteDocument = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
     const { db } = await import("../db");
     const { documents } = await import("../db/schema");
     await db.delete(documents).where(eq(documents.id, id));

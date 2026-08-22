@@ -108,7 +108,21 @@ function SidebarContent({ items, currentPath, onNavigate }: { items: NavItem[]; 
          <Link to="/settings" title="Settings" className="flex h-12 w-12 items-center justify-center rounded-2xl text-sidebar-foreground/70 hover:bg-background/10 hover:text-white">
             <Settings className="h-5 w-5" />
          </Link>
-         <Link to="/" title="Sign out" className="flex h-12 w-12 items-center justify-center rounded-2xl text-sidebar-foreground/70 hover:bg-background/10 hover:text-white">
+         <Link 
+            to="/" 
+            title="Sign out" 
+            onClick={async () => {
+              try {
+                const { logout } = await import("@/server/auth");
+                const { clearClientMe } = await import("@/lib/auth-client");
+                clearClientMe();
+                await logout();
+              } catch (e) {
+                // ignore
+              }
+            }} 
+            className="flex h-12 w-12 items-center justify-center rounded-2xl text-sidebar-foreground/70 hover:bg-background/10 hover:text-white"
+          >
             <LogOut className="h-5 w-5" />
          </Link>
          <Avatar className="h-10 w-10 border-2 border-background/20">
@@ -279,12 +293,6 @@ function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string;
     <header className="sticky top-0 z-40 flex h-20 items-center justify-between px-6 lg:px-10">
       <div className="flex items-center gap-6 lg:gap-10">
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-accent md:hidden"
-          >
-            <Menu className="h-4 w-4" />
-          </button>
           <div className="hidden items-center gap-2 md:flex">
             <span className="flex h-2 w-2 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>

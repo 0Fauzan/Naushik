@@ -11,7 +11,8 @@ export const getInventory = createServerFn({ method: "GET" })
 
 export const createInventoryItem = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: any }) => {
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { inventory } = await import("../db/schema");
     const [item] = await db.insert(inventory).values({
@@ -24,7 +25,8 @@ export const createInventoryItem = createServerFn({ method: "POST" })
 
 export const updateInventoryItem = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: any }) => {
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { inventory } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");
@@ -37,7 +39,8 @@ export const updateInventoryItem = createServerFn({ method: "POST" })
 
 export const deleteInventoryItem = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
     const { db } = await import("../db");
     const { inventory } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");
@@ -46,7 +49,8 @@ export const deleteInventoryItem = createServerFn({ method: "POST" })
 
 export const transferInventory = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: { sourceId: number, targetProject: string, qty: number } }) => {
+  .validator((data: { sourceId: number, targetProject: string, qty: number }) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { inventory } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");

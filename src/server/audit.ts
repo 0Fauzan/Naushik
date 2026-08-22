@@ -12,14 +12,17 @@ export const getAuditLogs = createServerFn({ method: "GET" })
 
 export const createAuditLog = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: { action: string, entity: string } }) => {
+  .validator((data: { action: string, entity: string }) => data)
+  .handler(async ({ data, context }) => {
     const { db } = await import("../db");
     const { auditLogs } = await import("../db/schema");
-    const { getAuthSession } = await import("./auth");
+    const { userId } = context as any;
     
-    // We get the user from auth session
-    const session = await getAuthSession();
-    const user = session?.name || "System";
+    // Fetch user name from db using userId from context
+    const { users } = await import("../db/schema");
+    const { eq } = await import("drizzle-orm");
+    const [u] = await db.select({ name: users.name }).from(users).where(eq(users.id, userId));
+    const user = u?.name || "System";
 
     const [log] = await db.insert(auditLogs).values({
       user,

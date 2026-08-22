@@ -90,15 +90,15 @@ function SiteMaterials() {
                       <div className="mt-6 space-y-4 text-sm">
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Category</span>
-                          <span className="font-medium">{m.category}</span>
+                          <span className="font-medium">{m.category || "General"}</span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
-                          <span className="text-muted-foreground">Current Stock</span>
-                          <span className="font-bold">{stock} {m.unit}</span>
+                          <span className="text-muted-foreground">Requested Quantity</span>
+                          <span className="font-bold">{m.qty || 0} {m.unit}</span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Value</span>
-                          <span className="font-medium">{inr(m.value || 0)}</span>
+                          <span className="font-medium">{inr(m.amount || 0)}</span>
                         </div>
                       </div>
                     </SheetContent>

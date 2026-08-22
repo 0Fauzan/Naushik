@@ -64,8 +64,8 @@ function AdminFinance() {
     }
   };
 
-  const totalBudget = projects.reduce((s, p) => s + p.budget, 0);
-  const totalSpent = projects.reduce((s, p) => s + p.spent, 0);
+  const totalBudget = projects.reduce((s, p) => s + (p.budget || 0), 0);
+  const totalSpent = projects.reduce((s, p) => s + (p.spent || 0), 0);
   const cashflow = kpiTrend.map((k) => ({ month: k.month, inflow: k.planned * 1.8, outflow: k.actual * 1.6 }));
 
   return (
@@ -151,12 +151,14 @@ function AdminFinance() {
         <CardHeader><CardTitle>Project budget utilisation</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           {projects.map((p) => {
-            const pct = Math.round((p.spent / p.budget) * 100);
+            const spent = p.spent || 0;
+            const budget = p.budget || 1;
+            const pct = Math.round((spent / budget) * 100);
             return (
               <div key={p.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
                 <div className="min-w-0">
                   <div className="truncate text-sm font-semibold">{p.name}</div>
-                  <div className="text-xs text-muted-foreground tabular-nums">{inr(p.spent)} of {inr(p.budget)}</div>
+                  <div className="text-xs text-muted-foreground tabular-nums">{inr(spent)} of {inr(p.budget || 0)}</div>
                   <Progress value={pct} className="mt-2 h-1.5" />
                 </div>
                 <div className="w-12 text-right text-sm font-bold tabular-nums">{pct}%</div>

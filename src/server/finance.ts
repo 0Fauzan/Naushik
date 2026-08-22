@@ -11,6 +11,7 @@ export const getStatements = createServerFn({ method: "GET" })
 
 export const createStatement = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
+  .validator((data: { type: string, period: string }) => data)
   .handler(async ({ data }: { data: { type: string, period: string } }) => {
     const { db } = await import("../db");
     const { statements } = await import("../db/schema");

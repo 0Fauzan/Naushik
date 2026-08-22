@@ -12,7 +12,8 @@ export const getNotes = createServerFn({ method: "GET" })
 
 export const createNote = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: { content: string, author: string } }) => {
+  .validator((data: { content: string, author: string }) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { notes } = await import("../db/schema");
     const [note] = await db.insert(notes).values({
@@ -24,7 +25,8 @@ export const createNote = createServerFn({ method: "POST" })
 
 export const updateNote = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: { id: number, content: string } }) => {
+  .validator((data: { id: number, content: string }) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { notes } = await import("../db/schema");
     const [note] = await db.update(notes).set({ content: data.content }).where(eq(notes.id, data.id)).returning();
@@ -33,7 +35,8 @@ export const updateNote = createServerFn({ method: "POST" })
 
 export const deleteNote = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
     const { db } = await import("../db");
     const { notes } = await import("../db/schema");
     await db.delete(notes).where(eq(notes.id, id));

@@ -11,7 +11,8 @@ export const getSiteManagers = createServerFn({ method: "GET" })
 
 export const createSiteManager = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: { name: string, project: string, experience: number } }) => {
+  .validator((data: { name: string, project: string, experience: number }) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { siteManagers } = await import("../db/schema");
     const [manager] = await db.insert(siteManagers).values({
@@ -26,7 +27,8 @@ export const createSiteManager = createServerFn({ method: "POST" })
 
 export const updateSiteManager = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: { id: number, name: string, project: string, experience: number } }) => {
+  .validator((data: { id: number, name: string, project: string, experience: number }) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { siteManagers } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");
@@ -40,7 +42,8 @@ export const updateSiteManager = createServerFn({ method: "POST" })
 
 export const deleteSiteManager = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
     const { db } = await import("../db");
     const { siteManagers } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");

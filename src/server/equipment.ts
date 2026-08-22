@@ -12,7 +12,8 @@ export const getEquipment = createServerFn({ method: "GET" })
 
 export const getEquipmentById = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
   const { db } = await import("../db");
   const { equipment } = await import("../db/schema");
   const [eqItem] = await db.select().from(equipment).where(eq(equipment.id, id));
@@ -21,7 +22,8 @@ export const getEquipmentById = createServerFn({ method: "GET" })
 
 export const updateEquipmentStatus = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: { id: number, status: string } }) => {
+  .validator((data: { id: number, status: string }) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { equipment } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");
@@ -30,7 +32,8 @@ export const updateEquipmentStatus = createServerFn({ method: "POST" })
 
 export const updateEquipment = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: any }) => {
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { equipment } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");
@@ -42,7 +45,8 @@ export const updateEquipment = createServerFn({ method: "POST" })
 
 export const deleteEquipment = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
     const { db } = await import("../db");
     const { equipment } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");

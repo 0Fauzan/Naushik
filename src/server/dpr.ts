@@ -11,7 +11,8 @@ export const getDprs = createServerFn({ method: "GET" })
 
 export const createDpr = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: any }) => {
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { dprs } = await import("../db/schema");
     const [dpr] = await db.insert(dprs).values({
@@ -24,7 +25,8 @@ export const createDpr = createServerFn({ method: "POST" })
 
 export const updateDpr = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: any }) => {
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { dprs } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");
@@ -36,7 +38,8 @@ export const updateDpr = createServerFn({ method: "POST" })
 
 export const deleteDpr = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
     const { db } = await import("../db");
     const { dprs } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");

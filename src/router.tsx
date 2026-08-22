@@ -16,8 +16,10 @@ export const getRouter = () => {
     context: { queryClient },
     scrollRestoration: true,
     defaultPreload: "intent",
-    defaultPreloadStaleTime: 30_000, // Preloaded data stays fresh for 30s
-    defaultStaleTime: 30_000,        // Loader data treated as fresh for 30s
+    defaultPreloadDelay: 50,
+    defaultPreloadStaleTime: 60_000, // Preloaded data stays fresh for 60s
+    defaultStaleTime: 60_000,        // Loader data treated as fresh for 60s
+    defaultPendingMs: 100,           // Avoid jarring flash of loading indicators
   });
 
   return router;

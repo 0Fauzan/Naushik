@@ -12,7 +12,8 @@ export const getProjects = createServerFn({ method: "GET" })
 
 export const getProject = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
     const { db } = await import("../db");
     const { projects } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");
@@ -22,7 +23,8 @@ export const getProject = createServerFn({ method: "GET" })
 
 export const getProjectDetails = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
     const { db } = await import("../db");
     const { projects, materialRequests, inventory, issues } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");
@@ -38,7 +40,8 @@ export const getProjectDetails = createServerFn({ method: "GET" })
 
 export const createProject = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: any }) => {
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { projects } = await import("../db/schema");
     const [project] = await db.insert(projects).values({
@@ -58,7 +61,8 @@ export const createProject = createServerFn({ method: "POST" })
 
 export const updateProject = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data }: { data: { id: number, name: string, client: string, location: string, manager: string, budget: number } }) => {
+  .validator((data: { id: number, name: string, client: string, location: string, manager: string, budget: number }) => data)
+  .handler(async ({ data }) => {
     const { db } = await import("../db");
     const { projects } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");
@@ -74,7 +78,8 @@ export const updateProject = createServerFn({ method: "POST" })
 
 export const deleteProject = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .handler(async ({ data: id }: { data: number }) => {
+  .validator((data: number) => data)
+  .handler(async ({ data: id }) => {
     const { db } = await import("../db");
     const { projects } = await import("../db/schema");
     const { eq } = await import("drizzle-orm");

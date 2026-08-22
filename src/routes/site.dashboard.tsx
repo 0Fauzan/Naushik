@@ -117,7 +117,7 @@ function SiteDashboard() {
                 </div>
                 <div className="text-right text-xs text-muted-foreground tabular-nums">
                   <div className="font-semibold text-foreground">{d.workers} pax</div>
-                  <div>{d.issues || 0} issue{(d.issues || 0) !== 1 ? "s" : ""}</div>
+                  <div>{d.progress}% progress</div>
                 </div>
               </div>
             ))}

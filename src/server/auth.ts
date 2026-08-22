@@ -45,7 +45,8 @@ export const register = createServerFn({ method: "POST" })
 });
 
 export const login = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: any }) => {
+  .validator((data: { email: string; password: string }) => data)
+  .handler(async ({ data }) => {
   console.log("LOGIN CALLED WITH:", data);
   try {
     const { email, password } = data;
