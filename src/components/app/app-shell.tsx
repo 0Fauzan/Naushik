@@ -137,7 +137,7 @@ function SidebarContent({ items, currentPath, onNavigate }: { items: NavItem[]; 
 
 function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string; }) {
   const [dark, setDark] = useState(false);
-  const { user, updateUser } = useRole();
+  const { user, updateUser, role } = useRole();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isNewBoardOpen, setIsNewBoardOpen] = useState(false);
@@ -290,20 +290,11 @@ function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string;
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-20 items-center justify-between px-6 lg:px-10">
-      <div className="flex items-center gap-6 lg:gap-10">
-        <div className="flex items-center gap-4">
-          <div className="hidden items-center gap-2 md:flex">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Real-time sync active</span>
-          </div>
-        </div>
+    <header className="sticky top-0 z-40 flex h-20 items-center justify-between px-4 sm:px-6 lg:px-10">
+      <div className="flex items-center gap-3 sm:gap-6 lg:gap-10">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu">
+            <Button variant="ghost" size="icon" className="lg:hidden h-10 w-10 rounded-full" aria-label="Open menu">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
@@ -315,7 +306,24 @@ function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string;
           </SheetContent>
         </Sheet>
 
+        {/* Mobile & Tablet Logo & Name */}
+        <Link to={role === "admin" ? "/admin/dashboard" : "/site/dashboard"} className="flex items-center gap-2.5 lg:hidden">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sidebar text-sidebar-foreground font-black text-base shadow-sm">
+            N
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-bold tracking-tight text-foreground leading-none">Naushik</span>
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium mt-0.5">Cloud</span>
+          </div>
+        </Link>
 
+        <div className="hidden items-center gap-2 md:flex">
+          <span className="flex h-2 w-2 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          </span>
+          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Real-time sync active</span>
+        </div>
       </div>
 
       <div className="relative hidden md:flex items-center flex-1 max-w-md mx-6">
