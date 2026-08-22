@@ -28,11 +28,12 @@ import {
   DropdownMenuLabel, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { SyncIndicator } from "@/components/app/sync-indicator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LayoutGrid } from "lucide-react";
 
 interface NavItem { to: string; label: string; icon: typeof LayoutDashboard; badge?: string; }
 
@@ -66,8 +67,8 @@ const MOBILE_NAV: Record<Role, NavItem[]> = {
 
 function BrandIcon() {
   return (
-    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-background text-primary font-black text-xl shadow-sm">
-      N
+    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/95 p-1.5 shadow-md border border-white/20 dark:border-white/10">
+      <img src="/naushik-icon.png" alt="Naushik" className="h-full w-full object-contain" />
     </div>
   );
 }
@@ -294,8 +295,8 @@ function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string;
       <div className="flex items-center gap-3 sm:gap-6 lg:gap-10">
         {/* Brand Logo & Name (Visible on mobile and tablet) */}
         <Link to={role === "admin" ? "/admin/dashboard" : "/site/dashboard"} className="flex items-center gap-2.5 lg:hidden">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-sidebar text-sidebar-foreground font-black text-lg shadow-sm">
-            N
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/95 p-1 shadow-sm border border-border/40">
+            <img src="/naushik-icon.png" alt="Naushik" className="h-full w-full object-contain" />
           </div>
           <div className="flex flex-col">
             <span className="text-base font-bold tracking-tight text-foreground leading-none">Naushik</span>
@@ -489,28 +490,91 @@ function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string;
   );
 }
 
-function BottomNav({ items, currentPath }: { items: NavItem[]; currentPath: string; }) {
+function BottomNav({ currentPath }: { currentPath: string }) {
+  const { role } = useRole();
+  const allItems = role === "admin" ? ADMIN_NAV : SITE_NAV;
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  // Primary 4 items on bottom bar
+  const primaryItems = role === "admin"
+    ? [ADMIN_NAV[0], ADMIN_NAV[1], ADMIN_NAV[3], ADMIN_NAV[4]]
+    : [SITE_NAV[0], SITE_NAV[2], SITE_NAV[4], SITE_NAV[7]];
+
+  const isMoreActive = allItems.slice(4).some((item) => currentPath === item.to || currentPath.startsWith(item.to + "/"));
+
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 grid h-16 grid-cols-5 border-t border-border bg-background/95 backdrop-blur lg:hidden">
-      {items.map((item) => {
-        const active = currentPath === item.to || currentPath.startsWith(item.to + "/");
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.to}
-            to={item.to}
-            className={cn(
-              "relative flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors",
-              active ? "text-primary" : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {active && <span className="absolute top-0 h-0.5 w-8 rounded-full bg-gold" />}
-            <Icon className="h-5 w-5" />
-            <span className="truncate">{item.label}</span>
-          </Link>
-        );
-      })}
-    </nav>
+    <>
+      <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+        <SheetContent side="bottom" className="rounded-t-[32px] p-6 max-h-[85vh] overflow-y-auto">
+          <SheetHeader className="text-left pb-4 border-b border-border">
+            <SheetTitle className="text-base font-bold flex items-center justify-between">
+              <span>All Modules</span>
+              <span className="text-[11px] font-normal text-muted-foreground uppercase tracking-wider">
+                {role === "admin" ? "Admin Suite" : "Site Operations"}
+              </span>
+            </SheetTitle>
+          </SheetHeader>
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-4">
+            {allItems.map((item) => {
+              const active = currentPath === item.to || currentPath.startsWith(item.to + "/");
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setMoreOpen(false)}
+                  className={cn(
+                    "flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all gap-2",
+                    active
+                      ? "bg-primary text-primary-foreground border-primary shadow-md"
+                      : "bg-card border-border/60 text-foreground hover:bg-accent"
+                  )}
+                >
+                  <div className={cn("p-2.5 rounded-xl", active ? "bg-white/20" : "bg-primary/10 text-primary")}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <span className="text-xs font-semibold leading-tight">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <nav className="fixed inset-x-0 bottom-0 z-30 grid h-16 grid-cols-5 border-t border-border bg-background/95 backdrop-blur lg:hidden">
+        {primaryItems.map((item) => {
+          const active = currentPath === item.to || currentPath.startsWith(item.to + "/");
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={cn(
+                "relative flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors",
+                active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {active && <span className="absolute top-0 h-0.5 w-8 rounded-full bg-gold" />}
+              <Icon className="h-5 w-5" />
+              <span className="truncate">{item.label}</span>
+            </Link>
+          );
+        })}
+
+        {/* 5th Tab: More Modules Drawer Trigger */}
+        <button
+          onClick={() => setMoreOpen(true)}
+          className={cn(
+            "relative flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors",
+            isMoreActive ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          {isMoreActive && <span className="absolute top-0 h-0.5 w-8 rounded-full bg-gold" />}
+          <LayoutGrid className="h-5 w-5" />
+          <span className="truncate">More</span>
+        </button>
+      </nav>
+    </>
   );
 }
 
@@ -544,7 +608,6 @@ function GlobalLoading() {
 export function AppShell({ children, title }: { children: ReactNode; title: string }) {
   const { role } = useRole();
   const items = role === "admin" ? ADMIN_NAV : SITE_NAV;
-  const mobileItems = MOBILE_NAV[role];
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
 
   return (
@@ -559,7 +622,7 @@ export function AppShell({ children, title }: { children: ReactNode; title: stri
         <TopBar items={items} currentPath={currentPath} />
         <main className="flex-1 px-4 sm:px-6 lg:px-10 py-6 pb-24 lg:pb-12">{children}</main>
       </div>
-      <BottomNav items={mobileItems} currentPath={currentPath} />
+      <BottomNav currentPath={currentPath} />
     </div>
   );
 }

@@ -78,14 +78,14 @@ function SignupPage() {
           
           {/* Logo & Header */}
           <div className="flex flex-col items-center mb-8">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-primary-foreground shadow-lg mb-4">
-              <span className="text-xl font-black">N</span>
+            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white/95 p-2 shadow-lg mb-4 border border-border/40">
+              <img src="/naushik-icon.png" alt="Naushik" className="h-full w-full object-contain" />
             </div>
             <div className="text-center">
-              <div className="text-sm font-bold tracking-tight text-foreground">Naushik</div>
-              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Construction Cloud</div>
+              <div className="text-base font-bold tracking-tight text-foreground">Naushik</div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-medium">Construction Cloud</div>
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-8">Create workspace</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-6">Create workspace</h1>
             <p className="text-sm text-muted-foreground mt-1">Setup your account to get started</p>
           </div>
 
