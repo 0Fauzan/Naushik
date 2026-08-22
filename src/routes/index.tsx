@@ -80,16 +80,12 @@ function LoginPage() {
         {/* Glassmorphic Card */}
         <div className="bg-card/70 backdrop-blur-xl border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.5)] rounded-[32px] p-8 sm:p-10">
           
-          {/* Logo & Header */}
+          {/* Complete Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white/95 p-2 shadow-lg mb-4 border border-border/40">
-              <img src="/naushik-icon.png" alt="Naushik" className="h-full w-full object-contain" />
+            <div className="p-3.5 bg-white/95 rounded-2xl shadow-sm border border-border/40 mb-6 flex items-center justify-center">
+              <img src="/naushik-logo.png" alt="Naushik" className="h-10 w-auto object-contain" />
             </div>
-            <div className="text-center">
-              <div className="text-base font-bold tracking-tight text-foreground">Naushik</div>
-              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-medium">Construction Cloud</div>
-            </div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-6">Welcome back</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h1>
             <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
           </div>
 

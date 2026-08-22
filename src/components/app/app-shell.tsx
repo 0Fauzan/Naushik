@@ -293,14 +293,10 @@ function TopBar({ items, currentPath }: { items: NavItem[]; currentPath: string;
   return (
     <header className="sticky top-0 z-40 flex h-20 items-center justify-between px-4 sm:px-6 lg:px-10">
       <div className="flex items-center gap-3 sm:gap-6 lg:gap-10">
-        {/* Brand Logo & Name (Visible on mobile and tablet) */}
-        <Link to={role === "admin" ? "/admin/dashboard" : "/site/dashboard"} className="flex items-center gap-2.5 lg:hidden">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/95 p-1 shadow-sm border border-border/40">
-            <img src="/naushik-icon.png" alt="Naushik" className="h-full w-full object-contain" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-base font-bold tracking-tight text-foreground leading-none">Naushik</span>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mt-0.5">Cloud</span>
+        {/* Complete Brand Logo (Visible on mobile and tablet) */}
+        <Link to={role === "admin" ? "/admin/dashboard" : "/site/dashboard"} className="flex items-center lg:hidden">
+          <div className="flex items-center px-2 py-1 bg-white/95 rounded-xl shadow-sm border border-border/40">
+            <img src="/naushik-logo.png" alt="Naushik" className="h-7 w-auto object-contain" />
           </div>
         </Link>
 
